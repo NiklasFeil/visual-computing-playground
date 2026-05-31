@@ -3,6 +3,7 @@
 #include "Core/Layer.hpp"
 #include "Core/Event.hpp"
 #include "Core/Shader.hpp"
+#include "Core/Object.hpp"
 #include <vector>
 #include <memory>
 
@@ -17,10 +18,7 @@ class AppLayer : public Core::Layer {
         void onRender() override;
 
     private:
-        unsigned int m_vao;
-        unsigned int m_vbo;
-        unsigned int m_shaderprogram;
 
-        std::vector<float> m_vertices;
+        std::unique_ptr<Core::Object> m_triangle;
         std::unique_ptr<Core::Shader> m_basic_shader;
 };

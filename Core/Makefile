@@ -80,6 +80,7 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/Application.o
 GENERATED += $(OBJDIR)/Event.o
+GENERATED += $(OBJDIR)/Object.o
 GENERATED += $(OBJDIR)/Shader.o
 GENERATED += $(OBJDIR)/Window.o
 GENERATED += $(OBJDIR)/glad.o
@@ -93,6 +94,7 @@ GENERATED += $(OBJDIR)/imgui_tables.o
 GENERATED += $(OBJDIR)/imgui_widgets.o
 OBJECTS += $(OBJDIR)/Application.o
 OBJECTS += $(OBJDIR)/Event.o
+OBJECTS += $(OBJDIR)/Object.o
 OBJECTS += $(OBJDIR)/Shader.o
 OBJECTS += $(OBJDIR)/Window.o
 OBJECTS += $(OBJDIR)/glad.o
@@ -198,6 +200,9 @@ $(OBJDIR)/Application.o: Source/Core/Application.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Event.o: Source/Core/Event.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Object.o: Source/Core/Object.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Shader.o: Source/Core/Shader.cpp

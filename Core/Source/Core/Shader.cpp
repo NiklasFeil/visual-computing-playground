@@ -3,7 +3,7 @@
 #include <iostream>
 
 namespace Core {
-    Shader::Shader(ShaderConfig&& config)
+    Shader::Shader(const ShaderConfig& config)
     : m_vertex_shader_code(config.vertex_shader_code), m_fragment_shader_code(config.fragment_shader_code) {}
 
     Shader::~Shader() {

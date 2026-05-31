@@ -10,7 +10,7 @@ namespace Core {
 
     class Shader {
         public:
-            Shader(ShaderConfig&& config);
+            Shader(const ShaderConfig& config);
             ~Shader();
             Shader(const Shader& other) = delete;
             Shader(const Shader&& other) = delete;
