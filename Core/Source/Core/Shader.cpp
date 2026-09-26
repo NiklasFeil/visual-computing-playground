@@ -1,13 +1,64 @@
 #include "Shader.hpp"
-#include "GLAD/glad.h"
 #include <iostream>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 namespace Core {
-    Shader::Shader(const ShaderConfig& config)
-    : m_vertex_shader_code(config.vertex_shader_code), m_fragment_shader_code(config.fragment_shader_code) {}
+    Shader::Shader(const ShaderConfig& config) {
+
+        if (!std::filesystem::exists(config.vertex_shader_path)) {
+            std::cerr << "Given vertex shader path " << config.vertex_shader_path << " does not exist." << std::endl;
+        }
+
+        if (!std::filesystem::exists(config.fragment_shader_path)) {
+            std::cerr << "Given fragment shader path " << config.fragment_shader_path << " does not exist." << std::endl;
+        }
+
+        std::ifstream vshader_file;
+        std::ifstream fshader_file;
+        vshader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fshader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+        try {
+            // Vertex Shader
+            // open files
+            vshader_file.open(config.vertex_shader_path);
+            std::stringstream vshader_stream;
+            // read file's buffer contents into streams
+            vshader_stream << vshader_file.rdbuf();
+            // close file handler
+            vshader_file.close();
+            // convert stream into string
+            m_vertex_shader_code = vshader_stream.str();
+        }
+        catch(std::ifstream::failure& e) {
+            std::cout << "ERROR::vertex_shader::FILE_NOT_SUCCESSFULLY_READ | Error code: " << e.code() << std::endl;
+        }
+
+        try {
+            // Fragment Shader
+            // open files
+            fshader_file.open(config.fragment_shader_path);
+            std::stringstream fshader_stream;
+            // read file's buffer contents into streams
+            fshader_stream << fshader_file.rdbuf();
+            // close file handler
+            fshader_file.close();
+            // convert stream into string
+            m_fragment_shader_code = fshader_stream.str();
+        }
+        catch(std::ifstream::failure& e) {
+            std::cout << "ERROR::fragment_shader::FILE_NOT_SUCCESSFULLY_READ | Error code: " << e.code() << std::endl;
+        }
+    }
 
     Shader::~Shader() {
         glDeleteShader(m_id);
+    }
+
+    void Shader::use() {
+        glUseProgram(m_id);
     }
 
     void Shader::compile() {
@@ -61,6 +112,5 @@ namespace Core {
 
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-
     }
 }

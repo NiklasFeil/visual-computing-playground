@@ -2,7 +2,9 @@
 #include "Application.hpp"
 #include <iostream>
 #include "assert.h"
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
 
 namespace Core {
 
@@ -40,6 +42,9 @@ namespace Core {
         s_Application = nullptr;
         glfwTerminate();
         m_window->destroy();
+        for (auto& l : m_layer_stack) {
+            l.reset();
+        }
         m_layer_stack.clear();
     }
     

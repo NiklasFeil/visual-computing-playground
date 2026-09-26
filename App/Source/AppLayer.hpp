@@ -1,9 +1,9 @@
 #pragma once
-//#include <GLAD/glad.h>
 #include "Core/Layer.hpp"
 #include "Core/Event.hpp"
 #include "Core/Shader.hpp"
 #include "Core/Object.hpp"
+#include "Core/Camera.hpp"
 #include <vector>
 #include <memory>
 
@@ -21,4 +21,5 @@ class AppLayer : public Core::Layer {
 
         std::unique_ptr<Core::Object> m_triangle;
         std::unique_ptr<Core::Shader> m_basic_shader;
+        std::unique_ptr<Core::Camera> m_camera;
 };
