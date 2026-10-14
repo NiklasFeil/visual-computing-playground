@@ -18,13 +18,16 @@ project "App"
 
    libdirs
    {
-      "../Core/Libs/GLFW"
+      "../Core/Libs/GLFW",
+      "../Core/Libs/assimp",
    }
 
    links
    {
       "Core",
-      "glfw3"
+      "glfw3",
+      "z",
+      "assimp"
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")

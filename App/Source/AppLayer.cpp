@@ -4,6 +4,8 @@
 #include "Core/Window.hpp"
 #include "Core/Shader.hpp"
 #include "Core/Transform.hpp"
+#include "Core/Model.hpp"
+#include "Core/Application.hpp"
 #include <filesystem>
 #include "glm/gtx/quaternion.hpp"
 
@@ -41,32 +43,41 @@ AppLayer::AppLayer() {
 
     Core::Transform transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
-    Core::TextureConfig duck_texture = {
-        "App/Images/duck_with_bread.jpg"
-    };
-
-    m_triangle = std::make_unique<Core::Object>(std::move(o_specs), transform, std::move(duck_texture));
-    m_camera = std::make_unique<Core::Camera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    const Core::Model model("App/Models/backpack/backpack.obj");
+    m_object = std::make_unique<Core::Object>(model, transform);
+    
+    m_camera = std::make_unique<Core::Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 AppLayer::~AppLayer() {
     std::cout << "Terminating AppLayer" << std::endl;
-    m_triangle.reset();
+    m_object.reset();
     m_basic_shader.reset();
 }
 
 void AppLayer::onUpdate(float dt) {
-    m_triangle->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
+    m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
+
+    auto& app = Core::Application::get();
+
+    auto size = app.get_framebuffer_size();
+    auto width = size.x, height = size.y;
+
+    std::cout << "Width: " << width << ", Height: " << height << std::endl;
 }
 
 void AppLayer::onRender() {
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
     m_basic_shader->use();
-    m_basic_shader->set_uniform("view", m_camera->get_view_matrix());
-    m_basic_shader->set_uniform("projection", m_camera->get_projection_matrix());
-    m_basic_shader->set_uniform("model", m_triangle->get_transform().get_model_matrix());
-    m_triangle->render();
+    m_basic_shader->set_uniform("uView", m_camera->get_view_matrix());
+    m_basic_shader->set_uniform("uProjection", m_camera->get_projection_matrix());
+    m_basic_shader->set_uniform("uModel", m_object->get_transform().get_model_matrix());
+
+    m_object->render(*m_basic_shader.get());
+
     glBindVertexArray(0);
 }

@@ -14,10 +14,13 @@ project "Core"
    }
 
    libdirs({ "Libs/GLFW" })
+   libdirs({ "Libs/assimp" })
 
    links 
    {
-       "glfw3"
+       "glfw3",
+       "assimp",
+       
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")

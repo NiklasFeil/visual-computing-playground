@@ -3,6 +3,7 @@
 #include "Core/Event.hpp"
 #include "Core/Shader.hpp"
 #include "Core/Object.hpp"
+#include "Core/Model.hpp"
 #include "Core/Camera.hpp"
 #include <vector>
 #include <memory>
@@ -19,7 +20,8 @@ class AppLayer : public Core::Layer {
 
     private:
 
-        std::unique_ptr<Core::Object> m_triangle;
+        std::unique_ptr<Core::Object> m_object;
         std::unique_ptr<Core::Shader> m_basic_shader;
         std::unique_ptr<Core::Camera> m_camera;
+
 };

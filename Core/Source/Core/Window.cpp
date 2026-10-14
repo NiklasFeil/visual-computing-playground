@@ -4,15 +4,12 @@
 
 namespace Core {
     Window::Window(const WindowConfig& config) 
-    : m_window_config(config) {
-
-    }
+    : m_window_config(config) {}
 
     Window::~Window() {
         std::cout << "Terminating Window" << std::endl;
         destroy();
     }
-
 
     GLFWwindow* Window::get_handle() {
         return m_glfw_window;
@@ -50,5 +47,9 @@ namespace Core {
             glfwDestroyWindow(m_glfw_window);
 
         m_glfw_window = nullptr;
+    }
+
+    glm::vec2 Window::get_framebuffer_size() const {
+        return glm::vec2(m_window_config.width, m_window_config.height);
     }
 }

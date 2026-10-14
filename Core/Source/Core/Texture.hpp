@@ -1,27 +1,19 @@
 #pragma once
 
+#include <iostream>
 #include <filesystem>
 #include <GLAD/glad.h>
 
 namespace Core {
- 
-    struct TextureConfig {
-        std::filesystem::path path;
-    };
 
-    class Texture {
-        public:
-            Texture(const TextureConfig& tex_config);
-            ~Texture();
-            /*Texture(const Texture& other) = delete;
-            Texture(const Texture&& other) = default;
-            Texture& operator= (const Texture& other) = delete;
-            Texture& operator= (const Texture&& other) = default;*/
+    struct Texture {
+        GLuint id;
+        std::string type; // TODO: Use enum instead of string
+        std::string path;
 
-            void bind();
-            void unbind();
+        void bind();
+        void unbind();
 
-        private:
-            GLuint m_id;
+        static GLuint from_file(const char* path, const std::string &directory, bool gamma);
     };
 }

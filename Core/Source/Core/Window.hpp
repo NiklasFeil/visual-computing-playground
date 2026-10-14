@@ -2,6 +2,7 @@
 #include <string>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include "glm/vec2.hpp"
 
 namespace Core {
     struct WindowConfig {
@@ -23,6 +24,7 @@ namespace Core {
             void update();
             void destroy();
             WindowConfig& get_config();
+            glm::vec2 get_framebuffer_size() const;
             GLFWwindow* get_handle();
 
         private:

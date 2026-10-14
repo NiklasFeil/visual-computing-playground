@@ -3,6 +3,7 @@
 #include <vector>
 #include "Texture.hpp"
 #include "Transform.hpp"
+#include "Model.hpp"
 #include "glm/glm.hpp"
 
 namespace Core {
@@ -15,8 +16,9 @@ namespace Core {
 
     class Object {
         public:
-            Object(const ObjectRenderSpecs& render_specs, const Transform& transform, const TextureConfig& texture);
-            Object(const ObjectRenderSpecs& render_specs, const glm::mat4& model, const TextureConfig& texture);
+            Object(const Model& model, const Transform& transform);
+            Object(const Model& model, const glm::mat4& model_matrix);
+            
             ~Object();
             Object(const Object& other);
             Object(const Object&& other);
@@ -25,11 +27,10 @@ namespace Core {
 
             Transform& get_transform();
 
-            void render();
+            void render(Shader& shader);
 
         private:
-            ObjectRenderSpecs m_render_specs; 
-            Texture m_texture;
+            Model m_model;
             Transform m_transform;
 
             unsigned int m_vao;

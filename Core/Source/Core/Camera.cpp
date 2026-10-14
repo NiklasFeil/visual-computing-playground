@@ -31,5 +31,4 @@ namespace Core {
     glm::mat4& Camera::get_projection_matrix() {
         return m_projection;
     }
-
 }

@@ -81,15 +81,20 @@ namespace Core {
         m_is_running = false;
     }
 
-    Application& Application::get() {
-        assert(s_Application);
-        return *s_Application;
+    glm::vec2 Application::get_framebuffer_size() const {
+        return m_window->get_framebuffer_size();
     }
 
     std::shared_ptr<Window> Application::get_window() const {
         assert(m_window);
         return m_window;
     }
+
+    Application& Application::get() {
+        assert(s_Application);
+        return *s_Application;
+    }
+
 
     float Application::get_time() {
         return glfwGetTime();

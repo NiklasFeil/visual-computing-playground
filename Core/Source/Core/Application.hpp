@@ -4,6 +4,7 @@
 #include <memory>
 #include "Layer.hpp"
 #include "Window.hpp"
+#include "glm/vec2.hpp"
 
 namespace Core {
     struct ApplicationConfig {
@@ -26,12 +27,29 @@ namespace Core {
                 m_layer_stack.push_back(std::make_unique<LT>());
             }
 
+            template <typename LT>
+            requires(std::is_base_of_v<Layer, LT>)
+            LT* get_layer() {
+                for (const auto& layer : m_layer_stack) {
+                    if (auto casted = dynamic_cast<LT*>(layer.get())) {
+                        return casted;
+                    }
+                }
+
+                return nullptr;
+            }
+
+            glm::vec2 get_framebuffer_size() const;
+
+            std::shared_ptr<Window> get_window() const;
+
+            static Application& get();
+
+            static float get_time();
+            
             void run();
             void stop();
 
-            static Application& get();
-            std::shared_ptr<Window> get_window() const;
-            static float get_time();
             
         private:
             std::vector<std::unique_ptr<Layer>> m_layer_stack;
