@@ -52,8 +52,11 @@ namespace Core {
 
             
         private:
+
+            void raise_event(Event& event);
+
             std::vector<std::unique_ptr<Layer>> m_layer_stack;
-            const ApplicationConfig& m_app_config;
+            ApplicationConfig m_app_config;
             std::shared_ptr<Window> m_window;
             bool m_is_running;
     };

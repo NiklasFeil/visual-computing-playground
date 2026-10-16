@@ -4,6 +4,7 @@
 #include "assert.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <ranges>
 
 
 namespace Core {
@@ -24,6 +25,8 @@ namespace Core {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        m_app_config.window_config.event_callback = [this](Event& event) { raise_event(event); };
 
         // Create Window
         m_window = std::make_unique<Window>(m_app_config.window_config);
@@ -98,5 +101,14 @@ namespace Core {
 
     float Application::get_time() {
         return glfwGetTime();
+    }
+
+
+    void Application::raise_event(Event& event) {
+
+        for (auto& layer : std::views::reverse(m_layer_stack)) {
+            layer->onEvent(event);
+            if (event.handled) break;
+        }
     }
 }

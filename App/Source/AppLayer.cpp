@@ -6,6 +6,8 @@
 #include "Core/Transform.hpp"
 #include "Core/Model.hpp"
 #include "Core/Application.hpp"
+#include "Core/InputEvent.hpp"
+#include "Core/WindowEvent.hpp"
 #include <filesystem>
 #include "glm/gtx/quaternion.hpp"
 
@@ -46,7 +48,7 @@ AppLayer::AppLayer() {
     const Core::Model model("App/Models/backpack/backpack.obj");
     m_object = std::make_unique<Core::Object>(model, transform);
     
-    m_camera = std::make_unique<Core::Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    m_camera = std::make_unique<Core::Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), 45.0f);
 }
 
 AppLayer::~AppLayer() {
@@ -55,15 +57,25 @@ AppLayer::~AppLayer() {
     m_basic_shader.reset();
 }
 
+void AppLayer::onEvent(Core::Event& event) {
+    Core::EventDispatcher dispatcher(event);
+    
+    dispatcher.dispatch<Core::KeyPressedEvent>([this](Core::KeyPressedEvent& e) { return onKeyPressed(e); });
+    dispatcher.dispatch<Core::KeyReleasedEvent>([this](Core::KeyReleasedEvent& e) { return onKeyReleased(e); });
+
+    dispatcher.dispatch<Core::MouseMovedEvent>([this](Core::MouseMovedEvent& e) { return onMouseMoved(e); });
+    dispatcher.dispatch<Core::MouseScrolledEvent>([this](Core::MouseScrolledEvent& e) { return onMouseScrolled(e); });
+
+    dispatcher.dispatch<Core::MouseButtonPressedEvent>([this](Core::MouseButtonPressedEvent& e) { return onMouseButtonPressed(e); });
+    dispatcher.dispatch<Core::MouseButtonReleasedEvent>([this](Core::MouseButtonReleasedEvent& e) { return onMouseButtonReleased(e); });
+
+    dispatcher.dispatch<Core::WindowResizeEvent>([this](Core::WindowResizeEvent& e) { return onWindowResize(e); });
+}
+
 void AppLayer::onUpdate(float dt) {
     m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
 
     auto& app = Core::Application::get();
-
-    auto size = app.get_framebuffer_size();
-    auto width = size.x, height = size.y;
-
-    std::cout << "Width: " << width << ", Height: " << height << std::endl;
 }
 
 void AppLayer::onRender() {
@@ -80,4 +92,56 @@ void AppLayer::onRender() {
     m_object->render(*m_basic_shader.get());
 
     glBindVertexArray(0);
+}
+
+bool AppLayer::onKeyPressed(Core::KeyPressedEvent& event) {
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
+}
+
+bool AppLayer::onKeyReleased(Core::KeyReleasedEvent& event) {
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
+}
+
+bool AppLayer::onWindowResize(Core::WindowResizeEvent& event) {
+
+    glViewport(0, 0, event.get_width(), event.get_height());
+    m_camera->update_projection();
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
+}
+
+bool AppLayer::onMouseButtonPressed(Core::MouseButtonPressedEvent& event) {
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
+}
+
+bool AppLayer::onMouseButtonReleased(Core::MouseButtonReleasedEvent& event) {
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
+}
+
+bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
+}
+
+bool AppLayer::onMouseScrolled(Core::MouseScrolledEvent& event) {
+
+    std::cout << event.to_string() << std::endl;
+
+    return false;
 }

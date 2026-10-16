@@ -1,9 +1,11 @@
 #include "Camera.hpp"
+#include "Application.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Core {
 
-    Camera::Camera(glm::vec3 pos, glm::vec3 target) {
+    Camera::Camera(glm::vec3 pos, glm::vec3 target, float fov)
+    : m_pos(pos), m_target(target), m_fov(fov) {
     
         glm::vec3 cameraDirection = glm::normalize(pos - target);
 
@@ -13,11 +15,8 @@ namespace Core {
         glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
         m_view = glm::lookAt(pos, target, cameraUp);
-        m_pos = pos;
-        m_target = target;
 
-        // TODO: Get the actual width and height and update on window resize
-        m_projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+        update_projection();
     }
 
     Camera::~Camera() {
@@ -30,5 +29,10 @@ namespace Core {
 
     glm::mat4& Camera::get_projection_matrix() {
         return m_projection;
+    }
+
+    void Camera::update_projection() {
+        glm::vec2 dim = Application::get().get_framebuffer_size();
+        m_projection = glm::perspective(glm::radians(m_fov), dim.x / dim.y, 0.1f, 100.0f);
     }
 }

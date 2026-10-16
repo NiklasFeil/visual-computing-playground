@@ -3,12 +3,17 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include "glm/vec2.hpp"
+#include <functional>
+#include "Event.hpp"
 
 namespace Core {
     struct WindowConfig {
         unsigned width;
         unsigned height;
         std::string title;
+
+        using EventCallbackFn = std::function<void(Event&)>; 
+        EventCallbackFn event_callback;
     };
     
     class Window {
@@ -26,10 +31,12 @@ namespace Core {
             WindowConfig& get_config();
             glm::vec2 get_framebuffer_size() const;
             GLFWwindow* get_handle();
+            
+            void raise_event(Event& event);
 
         private:
 
-            const WindowConfig& m_window_config;
+            WindowConfig m_window_config;
 
             GLFWwindow* m_glfw_window = nullptr;
     };
