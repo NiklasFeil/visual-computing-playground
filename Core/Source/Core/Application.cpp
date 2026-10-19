@@ -1,5 +1,6 @@
 #include "GLAD/glad.h"
 #include "Application.hpp"
+#include "Input.hpp"
 #include <iostream>
 #include "assert.h"
 #define GLFW_INCLUDE_NONE
@@ -72,6 +73,9 @@ namespace Core {
             }
 
             m_window->update();
+
+            // Design choice: Rather here or in event mouseMoved? 
+            Input::SetLastMousePos(Input::GetMousePosX(), Input::GetMousePosY());
 
             if(glfwWindowShouldClose(m_window->get_handle())) {
                 m_window->destroy();

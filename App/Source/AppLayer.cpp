@@ -10,6 +10,12 @@
 #include "Core/WindowEvent.hpp"
 #include <filesystem>
 #include "glm/gtx/quaternion.hpp"
+#include "Core/RadialCamera.hpp"
+#include "Core/Utils.hpp"
+#include "Core/Input.hpp"
+#include "Core/ButtonMappings.hpp"
+#include "Core/KeyMappings.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 AppLayer::AppLayer() {
 
@@ -43,12 +49,14 @@ AppLayer::AppLayer() {
         {3, 3, 2}
     };
 
-    Core::Transform transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    Core::Transform transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
     const Core::Model model("App/Models/backpack/backpack.obj");
     m_object = std::make_unique<Core::Object>(model, transform);
     
-    m_camera = std::make_unique<Core::Camera>(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), 45.0f);
+    m_camera = std::make_unique<Core::RadialCamera>(glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 45.0f);
+
+    Core::Input::SetLastMousePos(Core::Input::GetMousePosX(), Core::Input::GetMousePosY());
 }
 
 AppLayer::~AppLayer() {
@@ -61,7 +69,7 @@ void AppLayer::onEvent(Core::Event& event) {
     Core::EventDispatcher dispatcher(event);
     
     dispatcher.dispatch<Core::KeyPressedEvent>([this](Core::KeyPressedEvent& e) { return onKeyPressed(e); });
-    dispatcher.dispatch<Core::KeyReleasedEvent>([this](Core::KeyReleasedEvent& e) { return onKeyReleased(e); });
+    //dispatcher.dispatch<Core::KeyReleasedEvent>([this](Core::KeyReleasedEvent& e) { return onKeyReleased(e); });
 
     dispatcher.dispatch<Core::MouseMovedEvent>([this](Core::MouseMovedEvent& e) { return onMouseMoved(e); });
     dispatcher.dispatch<Core::MouseScrolledEvent>([this](Core::MouseScrolledEvent& e) { return onMouseScrolled(e); });
@@ -73,16 +81,28 @@ void AppLayer::onEvent(Core::Event& event) {
 }
 
 void AppLayer::onUpdate(float dt) {
-    m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
+    //m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
 
-    auto& app = Core::Application::get();
+    constexpr float multiplier = 0.1f;
+
+    if (Core::Input::IsKeyPressed(Core::Key::W)) {
+        m_camera->planar_move(glm::vec2(0.0f, 1.0f) * multiplier);
+    }
+    if (Core::Input::IsKeyPressed(Core::Key::A)) {
+        m_camera->planar_move(glm::vec2(-1.0f, 0.0f) * multiplier);
+    }
+    if (Core::Input::IsKeyPressed(Core::Key::S)) {
+        m_camera->planar_move(glm::vec2(0.0f, -1.0f) * multiplier);
+    }
+    if (Core::Input::IsKeyPressed(Core::Key::D)) {
+        m_camera->planar_move(glm::vec2(1.0f, 0.0f) * multiplier);
+    }
 }
 
 void AppLayer::onRender() {
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
     m_basic_shader->use();
     m_basic_shader->set_uniform("uView", m_camera->get_view_matrix());
@@ -95,15 +115,11 @@ void AppLayer::onRender() {
 }
 
 bool AppLayer::onKeyPressed(Core::KeyPressedEvent& event) {
-
-    std::cout << event.to_string() << std::endl;
-
+    
     return false;
 }
 
 bool AppLayer::onKeyReleased(Core::KeyReleasedEvent& event) {
-
-    std::cout << event.to_string() << std::endl;
 
     return false;
 }
@@ -113,28 +129,30 @@ bool AppLayer::onWindowResize(Core::WindowResizeEvent& event) {
     glViewport(0, 0, event.get_width(), event.get_height());
     m_camera->update_projection();
 
-    std::cout << event.to_string() << std::endl;
-
     return false;
 }
 
 bool AppLayer::onMouseButtonPressed(Core::MouseButtonPressedEvent& event) {
-
-    std::cout << event.to_string() << std::endl;
 
     return false;
 }
 
 bool AppLayer::onMouseButtonReleased(Core::MouseButtonReleasedEvent& event) {
 
-    std::cout << event.to_string() << std::endl;
-
     return false;
 }
 
 bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
 
-    std::cout << event.to_string() << std::endl;
+    if (Core::Input::IsMouseButtonPressed(Core::MouseButton::Left)) {
+        // Move Camera around center
+        const glm::vec2 last = Core::Input::GetLastMousePos();
+        const glm::vec2 curr = Core::Input::GetMousePos();
+        const glm::vec2 dim = Core::Application::get().get_framebuffer_size();
+        m_camera->move_along_sphere((curr - last) / dim, {10.0f, 10.0f});
+
+        return true;
+    }
 
     return false;
 }
@@ -143,5 +161,9 @@ bool AppLayer::onMouseScrolled(Core::MouseScrolledEvent& event) {
 
     std::cout << event.to_string() << std::endl;
 
+    m_camera->add_to_radius(event.get_offset_y());
+    m_camera->update_pos();    
+    m_camera->update_view();
+        
     return false;
 }

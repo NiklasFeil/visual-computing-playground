@@ -5,6 +5,7 @@
 #include "Core/Object.hpp"
 #include "Core/Model.hpp"
 #include "Core/Camera.hpp"
+#include "Core/RadialCamera.hpp"
 #include "Core/InputEvent.hpp"
 #include "Core/WindowEvent.hpp"
 #include <vector>
@@ -24,7 +25,7 @@ class AppLayer : public Core::Layer {
 
         std::unique_ptr<Core::Object> m_object;
         std::unique_ptr<Core::Shader> m_basic_shader;
-        std::unique_ptr<Core::Camera> m_camera;
+        std::unique_ptr<Core::RadialCamera> m_camera;
 
         bool onKeyPressed(Core::KeyPressedEvent& event);
         bool onKeyReleased(Core::KeyReleasedEvent& event);
@@ -33,5 +34,4 @@ class AppLayer : public Core::Layer {
         bool onMouseButtonReleased(Core::MouseButtonReleasedEvent& event);
         bool onMouseMoved(Core::MouseMovedEvent& event);
         bool onMouseScrolled(Core::MouseScrolledEvent& event);
-
 };

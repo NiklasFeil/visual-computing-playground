@@ -5,16 +5,9 @@
 namespace Core {
 
     Camera::Camera(glm::vec3 pos, glm::vec3 target, float fov)
-    : m_pos(pos), m_target(target), m_fov(fov) {
+    : m_position(pos), m_target(target), m_fov(fov) {
     
-        glm::vec3 cameraDirection = glm::normalize(pos - target);
-
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
-        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-
-        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-
-        m_view = glm::lookAt(pos, target, cameraUp);
+        update_view();
 
         update_projection();
     }
@@ -23,12 +16,50 @@ namespace Core {
 
     }
 
-    glm::mat4& Camera::get_view_matrix() {
+    const glm::mat4& Camera::get_view_matrix() const{
         return m_view;
     }
 
-    glm::mat4& Camera::get_projection_matrix() {
+    const glm::mat4& Camera::get_projection_matrix() const{
         return m_projection;
+    }
+
+    inline glm::vec3 Camera::get_position() const {
+        return m_position;
+    }
+
+    void Camera::set_position(glm::vec3 position) {
+        m_position = position;
+    }
+
+    inline glm::vec3 Camera::get_target() const {
+        return m_target;
+    }
+
+    void Camera::set_target(glm::vec3 target) {
+        m_target = target;
+    }
+
+    inline glm::vec3 Camera::get_direction() const {
+        return glm::normalize(m_target - m_position);
+    }
+
+    /*
+    // Local coordinate system (right, dir, up)
+    void Camera::shift(glm::vec3 shift) {
+
+    }
+    */
+
+    void Camera::update_view() {
+        glm::vec3 cameraDirection = glm::normalize(m_position - m_target);
+
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
+        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+
+        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+        m_view = glm::lookAt(m_position, m_target, cameraUp);
     }
 
     void Camera::update_projection() {

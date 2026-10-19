@@ -110,7 +110,6 @@ namespace Core {
 			MouseMovedEvent event(x, y);
 			window.raise_event(event);
 		});
-
     }
 
     void Window::update() {
