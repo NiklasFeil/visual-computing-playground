@@ -16,15 +16,15 @@ namespace Core {
 
     }
 
-    const glm::mat4& Camera::get_view_matrix() const{
+    const glm::mat4& Camera::get_view_matrix() const {
         return m_view;
     }
 
-    const glm::mat4& Camera::get_projection_matrix() const{
+    const glm::mat4& Camera::get_projection_matrix() const {
         return m_projection;
     }
 
-    inline glm::vec3 Camera::get_position() const {
+    glm::vec3 Camera::get_position() const {
         return m_position;
     }
 

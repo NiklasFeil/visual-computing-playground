@@ -3,13 +3,15 @@
 #include "Core/Event.hpp"
 #include "Core/Shader.hpp"
 #include "Core/Object.hpp"
+#include "Core/Primitive.hpp"
 #include "Core/Model.hpp"
-#include "Core/Camera.hpp"
 #include "Core/RadialCamera.hpp"
 #include "Core/InputEvent.hpp"
 #include "Core/WindowEvent.hpp"
 #include <vector>
 #include <memory>
+#include "Core/PointLight.hpp"
+#include "Core/ShaderContainer.hpp"
 
 class AppLayer : public Core::Layer {
 
@@ -24,8 +26,15 @@ class AppLayer : public Core::Layer {
     private:
 
         std::unique_ptr<Core::Object> m_object;
+        std::unique_ptr<Core::Primitive> m_primitive;
+        
         std::unique_ptr<Core::Shader> m_basic_shader;
+        std::unique_ptr<Core::ShaderContainer> m_shader_container;
         std::unique_ptr<Core::RadialCamera> m_camera;
+
+        // Store different types of light sources in different vectors.
+        // They can be stored in the same vector by storing pointers to LightSource
+        std::vector<Core::PointLight> m_point_lights;
 
         bool onKeyPressed(Core::KeyPressedEvent& event);
         bool onKeyReleased(Core::KeyReleasedEvent& event);

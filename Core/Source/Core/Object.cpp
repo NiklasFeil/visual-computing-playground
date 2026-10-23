@@ -1,8 +1,5 @@
 #include "Object.hpp"
-#include <GLAD/glad.h>
-#include <utility>
 #include <iostream>
-#include <numeric>
 
 namespace Core {
     Object::Object(const Model& model, const Transform& transform) 
@@ -12,11 +9,8 @@ namespace Core {
     : m_model(model), m_transform(Transform::from_model_matrix(model_matrix)) {}
 
     void Object::render(Shader& shader) {
-        glEnable(GL_DEPTH_TEST);
-
+        shader.use();
         m_model.render(shader);
-        
-        glDisable(GL_DEPTH_TEST);
     }
 
     Object::~Object() {

@@ -7,24 +7,25 @@
 #include "glm/gtc/type_ptr.hpp"
 #include <GLAD/glad.h>
 #include <filesystem>
+#include "Camera.hpp"
 
 namespace Core {
-    struct ShaderConfig {
-        std::filesystem::path vertex_shader_path;
-        std::filesystem::path fragment_shader_path;
-    };
 
     class Shader {
         public:
-            Shader(const ShaderConfig& config);
+            Shader(const std::filesystem::path vertex_shader_path, const std::filesystem::path fragment_shader_path);
             ~Shader();
-            Shader(const Shader& other) = delete;
-            Shader(const Shader&& other) = delete;
-            Shader& operator= (const Shader& other) = delete;
-            Shader& operator= (const Shader&& other) = delete; 
+            /*
+            Shader(const Shader& other) = default;
+            Shader(const Shader&& other) = default;
+            Shader& operator= (const Shader& other) = default;
+            Shader& operator= (const Shader&& other) = default; 
+            */
 
             void use();
             void compile();
+
+            void set_camera_uniforms(Camera& camera);
 
             template <typename T>
             void set_uniform(std::string_view name, T value) {

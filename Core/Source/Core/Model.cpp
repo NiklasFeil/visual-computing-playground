@@ -4,16 +4,16 @@
 
 namespace Core {
 
-    Model::Model(std::string path) {
-        loadModel(path);
+    Model::Model(std::string path, bool flip_uvs) {
+        loadModel(path, flip_uvs);
     }
 
-    void Model::loadModel(std::string path) {
+    void Model::loadModel(std::string path, bool flip_uvs) {
         
         Assimp::Importer import;
         
         // TODO: Add options when loading to support more configurations.
-        const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);// | aiProcess_FlipUVs);
+        const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | (aiProcess_FlipUVs * flip_uvs));
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
@@ -46,7 +46,6 @@ namespace Core {
         std::vector<unsigned int> indices;
         std::vector<Texture> textures;
         
-           
         // Process Vertices
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             Vertex vertex;

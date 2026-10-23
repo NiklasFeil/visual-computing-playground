@@ -18,7 +18,7 @@ namespace Core {
     : m_translation(pos), m_orientation(orientation), m_scale(scale), m_model_up_to_date(false) {}
 
 
-    const glm::vec3& Transform::get_position() const {
+    const glm::vec3 Transform::get_position() const {
         return m_translation;
     };
 
@@ -26,7 +26,7 @@ namespace Core {
         return m_orientation;
     };
 
-    const glm::vec3& Transform::get_orientation_euler() const {
+    const glm::vec3 Transform::get_orientation_euler() const {
         return glm::eulerAngles(m_orientation);
     };
 

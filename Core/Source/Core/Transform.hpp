@@ -13,9 +13,9 @@ namespace Core {
             Transform(const glm::vec3& pos, const glm::quat& orientation);
             Transform(const glm::vec3& pos, const glm::quat& orientation, const glm::vec3& scale);
 
-            const glm::vec3& get_position() const;
+            const glm::vec3 get_position() const;
             const glm::quat& get_orientation_quat() const;
-            const glm::vec3& get_orientation_euler() const;
+            const glm::vec3 get_orientation_euler() const;
             const glm::vec3& get_scale() const;
             const glm::mat4& get_model_matrix();
 

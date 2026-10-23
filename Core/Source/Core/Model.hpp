@@ -9,7 +9,7 @@
 namespace Core {
     class Model {
         public:
-            Model(std::string path);
+            Model(std::string path, bool flip_uvs);
 
             void render(Shader& shader);
 
@@ -19,7 +19,7 @@ namespace Core {
             std::vector<Mesh> m_meshes;
             std::string m_directory;
 
-            void loadModel(std::string path);
+            void loadModel(std::string path, bool flip_uvs);
             void processNode(aiNode *node, const aiScene *scene);
             Mesh processMesh(aiMesh *mesh, const aiScene *scene);
             std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);

@@ -1,18 +1,19 @@
 #include "Shader.hpp"
+#include "ShaderContainer.hpp"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 
 namespace Core {
-    Shader::Shader(const ShaderConfig& config) {
+    Shader::Shader(const std::filesystem::path vertex_shader_path, const std::filesystem::path fragment_shader_path) {
 
-        if (!std::filesystem::exists(config.vertex_shader_path)) {
-            std::cerr << "Given vertex shader path " << config.vertex_shader_path << " does not exist." << std::endl;
+        if (!std::filesystem::exists(vertex_shader_path)) {
+            std::cerr << "Given vertex shader path " << vertex_shader_path << " does not exist." << std::endl;
         }
 
-        if (!std::filesystem::exists(config.fragment_shader_path)) {
-            std::cerr << "Given fragment shader path " << config.fragment_shader_path << " does not exist." << std::endl;
+        if (!std::filesystem::exists(fragment_shader_path)) {
+            std::cerr << "Given fragment shader path " << fragment_shader_path << " does not exist." << std::endl;
         }
 
         std::ifstream vshader_file;
@@ -23,7 +24,7 @@ namespace Core {
         try {
             // Vertex Shader
             // open files
-            vshader_file.open(config.vertex_shader_path);
+            vshader_file.open(vertex_shader_path);
             std::stringstream vshader_stream;
             // read file's buffer contents into streams
             vshader_stream << vshader_file.rdbuf();
@@ -39,7 +40,7 @@ namespace Core {
         try {
             // Fragment Shader
             // open files
-            fshader_file.open(config.fragment_shader_path);
+            fshader_file.open(fragment_shader_path);
             std::stringstream fshader_stream;
             // read file's buffer contents into streams
             fshader_stream << fshader_file.rdbuf();
@@ -112,5 +113,11 @@ namespace Core {
 
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+    }
+
+    void Shader::set_camera_uniforms(Camera& camera) {
+        set_uniform("uView", camera.get_view_matrix());
+        set_uniform("uProjection", camera.get_projection_matrix());
+        set_uniform("uViewPos", camera.get_position());
     }
 }

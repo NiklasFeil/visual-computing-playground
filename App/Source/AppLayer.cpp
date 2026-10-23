@@ -19,42 +19,27 @@
 
 AppLayer::AppLayer() {
 
-    m_basic_shader = std::make_unique<Core::Shader>(Core::ShaderConfig("App/Shaders/basic.vert", "App/Shaders/basic.frag"));
-    m_basic_shader->compile();
+    m_shader_container = std::make_unique<Core::ShaderContainer>();
 
-    std::vector<float> vertices = {
-        // Positions          // Colors          // UV
-        -0.5f, -0.5f,-0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,    0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f,    0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, 0.5f,   0.0f, 1.0f, 1.0f,  0.0f, 1.0f,
-        0.5f,  0.5f, 0.5f,    0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-    };
-    std::vector<int> indices = {
-        0, 2, 1, 2, 3, 1,
-        0, 5, 4, 0, 1, 5,
-        0, 6, 2, 0, 4, 6,
-        2, 6, 3, 6, 7, 3,
-        1, 3, 7, 1, 7, 5,
-        7, 6, 4, 5, 7, 4 
-    };
+    Core::Shader primitive_phong_shader("App/Shaders/phong.vert", "App/Shaders/phong_primitive.frag");
+    primitive_phong_shader.compile();
+    m_shader_container->add_shader("primitive phong shader", std::move(primitive_phong_shader));
 
-    Core::ObjectRenderSpecs o_specs = {
-        vertices,
-        indices,
-        GL_TRIANGLES,
-        {3, 3, 2}
-    };
+    Core::Shader model_phong_shader("App/Shaders/phong.vert", "App/Shaders/phong.frag");
+    model_phong_shader.compile();
+    m_shader_container->add_shader("model phong shader", std::move(model_phong_shader));
 
-    Core::Transform transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    Core::Transform transform_obj(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    Core::Transform transform_cube(glm::vec3(3.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 
-    const Core::Model model("App/Models/backpack/backpack.obj");
-    m_object = std::make_unique<Core::Object>(model, transform);
+    const Core::Model model("App/Models/cow/cow.obj", true);
+    m_object = std::make_unique<Core::Object>(model, transform_obj);
+    m_primitive = std::make_unique<Core::Cuboid>(transform_cube, glm::vec3(1.0f, 0.0f, 0.0f));
     
     m_camera = std::make_unique<Core::RadialCamera>(glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 45.0f);
+
+    m_point_lights = std::vector<Core::PointLight>();
+    m_point_lights.emplace_back(glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0f, 10.0f);
 
     Core::Input::SetLastMousePos(Core::Input::GetMousePosX(), Core::Input::GetMousePosY());
 }
@@ -62,7 +47,9 @@ AppLayer::AppLayer() {
 AppLayer::~AppLayer() {
     std::cout << "Terminating AppLayer" << std::endl;
     m_object.reset();
+    m_shader_container->clear();
     m_basic_shader.reset();
+    m_point_lights.clear();
 }
 
 void AppLayer::onEvent(Core::Event& event) {
@@ -81,7 +68,7 @@ void AppLayer::onEvent(Core::Event& event) {
 }
 
 void AppLayer::onUpdate(float dt) {
-    //m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
+    m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
 
     constexpr float multiplier = 0.1f;
 
@@ -101,17 +88,37 @@ void AppLayer::onUpdate(float dt) {
 
 void AppLayer::onRender() {
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glEnable(GL_DEPTH_TEST);    
+    glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_basic_shader->use();
-    m_basic_shader->set_uniform("uView", m_camera->get_view_matrix());
-    m_basic_shader->set_uniform("uProjection", m_camera->get_projection_matrix());
-    m_basic_shader->set_uniform("uModel", m_object->get_transform().get_model_matrix());
+    Core::Shader& model_shader = m_shader_container->get_shader("model phong shader");
+    model_shader.use();
+    model_shader.set_camera_uniforms(*m_camera.get());
 
-    m_object->render(*m_basic_shader.get());
+    for (unsigned int i = 0; i < m_point_lights.size(); ++i) {
+        model_shader.set_uniform("uLight.color", m_point_lights[i].get_color());
+        model_shader.set_uniform("uLight.position", m_point_lights[i].get_position());
+    }
+
+    model_shader.set_uniform("uModel", m_object->get_transform().get_model_matrix());
+    m_object->render(model_shader);
+
+
+    Core::Shader& primitive_shader = m_shader_container->get_shader("primitive phong shader");
+    primitive_shader.use();
+    primitive_shader.set_camera_uniforms(*m_camera.get());
+
+    for (unsigned int i = 0; i < m_point_lights.size(); ++i) {
+        primitive_shader.set_uniform("uLight.color", m_point_lights[i].get_color());
+        primitive_shader.set_uniform("uLight.position", m_point_lights[i].get_position());
+    }
+
+    primitive_shader.set_uniform("uModel", m_primitive->get_transform().get_model_matrix());
+    m_primitive->render(primitive_shader);
 
     glBindVertexArray(0);
+    glDisable(GL_DEPTH_TEST);
 }
 
 bool AppLayer::onKeyPressed(Core::KeyPressedEvent& event) {
@@ -144,7 +151,7 @@ bool AppLayer::onMouseButtonReleased(Core::MouseButtonReleasedEvent& event) {
 
 bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
 
-    if (Core::Input::IsMouseButtonPressed(Core::MouseButton::Left)) {
+    if (Core::Input::IsMouseButtonPressed(Core::MouseButton::Right)) {
         // Move Camera around center
         const glm::vec2 last = Core::Input::GetLastMousePos();
         const glm::vec2 curr = Core::Input::GetMousePos();
@@ -158,8 +165,6 @@ bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
 }
 
 bool AppLayer::onMouseScrolled(Core::MouseScrolledEvent& event) {
-
-    std::cout << event.to_string() << std::endl;
 
     m_camera->add_to_radius(event.get_offset_y());
     m_camera->update_pos();    

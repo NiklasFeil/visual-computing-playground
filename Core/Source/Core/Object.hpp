@@ -1,18 +1,9 @@
 #pragma once
-#include <memory>
-#include <vector>
-#include "Texture.hpp"
 #include "Transform.hpp"
 #include "Model.hpp"
 #include "glm/glm.hpp"
 
 namespace Core {
-    struct ObjectRenderSpecs {
-        std::vector<float> vertices;
-        std::vector<int> indices;
-        int drawing_method;
-        std::vector<unsigned int> elements_per_vertex_attribute;  
-    };
 
     class Object {
         public:
