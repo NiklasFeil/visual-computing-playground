@@ -1,20 +1,22 @@
 #include "AppLayer.hpp"
 #include <iostream>
 #include <vector>
-#include "Core/Window.hpp"
-#include "Core/Shader.hpp"
-#include "Core/Transform.hpp"
-#include "Core/Model.hpp"
-#include "Core/Application.hpp"
-#include "Core/InputEvent.hpp"
-#include "Core/WindowEvent.hpp"
+#include "Quack/Core/Window.hpp"
+#include "Quack/Rendering/Shader.hpp"
+#include "Quack/Geometry/Transform.hpp"
+#include "Quack/Geometry/Model.hpp"
+#include "Quack/Core/Application.hpp"
+#include "Quack/Events/InputEvent.hpp"
+#include "Quack/Events/WindowEvent.hpp"
 #include <filesystem>
 #include "glm/gtx/quaternion.hpp"
-#include "Core/RadialCamera.hpp"
-#include "Core/Utils.hpp"
-#include "Core/Input.hpp"
-#include "Core/ButtonMappings.hpp"
-#include "Core/KeyMappings.hpp"
+#include "Quack/Camera/RadialCamera.hpp"
+#include "Quack/Utils/Utils.hpp"
+#include "Quack/Events/Input.hpp"
+#include "Quack/Mappings/ButtonMappings.hpp"
+#include "Quack/Mappings/KeyMappings.hpp"
+#include "Quack/Rendering/Renderer.hpp"
+#include "GuiLayer.hpp"
 #include <glm/gtx/string_cast.hpp>
 
 AppLayer::AppLayer() {
@@ -68,53 +70,53 @@ void AppLayer::onEvent(Core::Event& event) {
 }
 
 void AppLayer::onUpdate(float dt) {
-    m_object->get_transform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
+    m_object->getTransform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
 
     constexpr float multiplier = 0.1f;
 
     if (Core::Input::IsKeyPressed(Core::Key::W)) {
-        m_camera->planar_move(glm::vec2(0.0f, 1.0f) * multiplier);
+        m_camera->planarMove(glm::vec2(0.0f, 1.0f) * multiplier);
     }
     if (Core::Input::IsKeyPressed(Core::Key::A)) {
-        m_camera->planar_move(glm::vec2(-1.0f, 0.0f) * multiplier);
+        m_camera->planarMove(glm::vec2(-1.0f, 0.0f) * multiplier);
     }
     if (Core::Input::IsKeyPressed(Core::Key::S)) {
-        m_camera->planar_move(glm::vec2(0.0f, -1.0f) * multiplier);
+        m_camera->planarMove(glm::vec2(0.0f, -1.0f) * multiplier);
     }
     if (Core::Input::IsKeyPressed(Core::Key::D)) {
-        m_camera->planar_move(glm::vec2(1.0f, 0.0f) * multiplier);
+        m_camera->planarMove(glm::vec2(1.0f, 0.0f) * multiplier);
     }
 }
 
 void AppLayer::onRender() {
 
     glEnable(GL_DEPTH_TEST);    
-    glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Core::Renderer::ClearColorBuffer({0.2f, 0.3f, 0.6f});
+    Core::Renderer::ClearDepthBuffer();
 
     Core::Shader& model_shader = m_shader_container->get_shader("model phong shader");
     model_shader.use();
-    model_shader.set_camera_uniforms(*m_camera.get());
+    model_shader.setCameraUniforms(*m_camera.get());
 
-    for (unsigned int i = 0; i < m_point_lights.size(); ++i) {
-        model_shader.set_uniform("uLight.color", m_point_lights[i].get_color());
-        model_shader.set_uniform("uLight.position", m_point_lights[i].get_position());
+    for (uint16_t i = 0; i < m_point_lights.size(); ++i) {
+        model_shader.setUniform("uLight.color", m_point_lights[i].get_color());
+        model_shader.setUniform("uLight.position", m_point_lights[i].get_position());
     }
 
-    model_shader.set_uniform("uModel", m_object->get_transform().get_model_matrix());
+    model_shader.setUniform("uModel", m_object->getTransform().getModelMatrix());
     m_object->render(model_shader);
 
 
     Core::Shader& primitive_shader = m_shader_container->get_shader("primitive phong shader");
     primitive_shader.use();
-    primitive_shader.set_camera_uniforms(*m_camera.get());
+    primitive_shader.setCameraUniforms(*m_camera.get());
 
-    for (unsigned int i = 0; i < m_point_lights.size(); ++i) {
-        primitive_shader.set_uniform("uLight.color", m_point_lights[i].get_color());
-        primitive_shader.set_uniform("uLight.position", m_point_lights[i].get_position());
+    for (uint16_t i = 0; i < m_point_lights.size(); ++i) {
+        primitive_shader.setUniform("uLight.color", m_point_lights[i].get_color());
+        primitive_shader.setUniform("uLight.position", m_point_lights[i].get_position());
     }
 
-    primitive_shader.set_uniform("uModel", m_primitive->get_transform().get_model_matrix());
+    primitive_shader.setUniform("uModel", m_primitive->get_transform().getModelMatrix());
     m_primitive->render(primitive_shader);
 
     glBindVertexArray(0);
@@ -122,6 +124,14 @@ void AppLayer::onRender() {
 }
 
 bool AppLayer::onKeyPressed(Core::KeyPressedEvent& event) {
+
+    /*
+    if (event.get_key_code() == Core::Key::Space) {
+        std::cout << "Switch" << std::endl;
+        TransitionTo<GuiLayer>();
+        return true;
+    }
+    */
     
     return false;
 }
@@ -133,8 +143,8 @@ bool AppLayer::onKeyReleased(Core::KeyReleasedEvent& event) {
 
 bool AppLayer::onWindowResize(Core::WindowResizeEvent& event) {
 
-    glViewport(0, 0, event.get_width(), event.get_height());
-    m_camera->update_projection();
+    glViewport(0, 0, event.getWidth(), event.getHeight());
+    m_camera->updateProjection();
 
     return false;
 }
@@ -155,8 +165,8 @@ bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
         // Move Camera around center
         const glm::vec2 last = Core::Input::GetLastMousePos();
         const glm::vec2 curr = Core::Input::GetMousePos();
-        const glm::vec2 dim = Core::Application::get().get_framebuffer_size();
-        m_camera->move_along_sphere((curr - last) / dim, {10.0f, 10.0f});
+        const glm::vec2 dim = Core::Application::Get().getFramebufferSize();
+        m_camera->moveAlongSphere((curr - last) / dim, {10.0f, 10.0f});
 
         return true;
     }
@@ -166,9 +176,9 @@ bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
 
 bool AppLayer::onMouseScrolled(Core::MouseScrolledEvent& event) {
 
-    m_camera->add_to_radius(event.get_offset_y());
-    m_camera->update_pos();    
-    m_camera->update_view();
+    m_camera->addToRadius(event.getOffsetY());
+    m_camera->updatePos();    
+    m_camera->updateView();
         
     return false;
 }

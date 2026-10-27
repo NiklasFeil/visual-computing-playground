@@ -9,8 +9,9 @@ project "Core"
 
    includedirs
    {
-      "Source",
-      "Libs"
+      "Source/Quack",
+      "Libs",
+      "Libs/imgui"
    }
 
    libdirs({ "Libs/GLFW" })
@@ -20,7 +21,6 @@ project "Core"
    {
        "glfw3",
        "assimp",
-       
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")

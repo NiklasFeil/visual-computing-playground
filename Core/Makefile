@@ -27,13 +27,13 @@ endif
 ifeq ($(origin AR), default)
   AR = ar
 endif
-INCLUDES += -ISource -ILibs
+INCLUDES += -ISource/Quack -ILibs -ILibs/imgui
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-LIBS += -lglfw3
+LIBS += -lglfw3 -lassimp
 LDDEPS +=
-ALL_LDFLAGS += $(LDFLAGS) -LLibs/GLFW -L/usr/lib64 -m64
+ALL_LDFLAGS += $(LDFLAGS) -LLibs/GLFW -LLibs/assimp -L/usr/lib64 -m64
 LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
 define PREBUILDCMDS
 endef
@@ -80,14 +80,21 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/Application.o
 GENERATED += $(OBJDIR)/Camera.o
-GENERATED += $(OBJDIR)/Event.o
+GENERATED += $(OBJDIR)/Layer.o
+GENERATED += $(OBJDIR)/Mesh.o
+GENERATED += $(OBJDIR)/Model.o
 GENERATED += $(OBJDIR)/Object.o
+GENERATED += $(OBJDIR)/PointLight.o
+GENERATED += $(OBJDIR)/Primitive.o
+GENERATED += $(OBJDIR)/RadialCamera.o
 GENERATED += $(OBJDIR)/Shader.o
+GENERATED += $(OBJDIR)/ShaderContainer.o
 GENERATED += $(OBJDIR)/Texture.o
 GENERATED += $(OBJDIR)/Transform.o
 GENERATED += $(OBJDIR)/Window.o
 GENERATED += $(OBJDIR)/glad.o
 GENERATED += $(OBJDIR)/glm.o
+GENERATED += $(OBJDIR)/gui.o
 GENERATED += $(OBJDIR)/imgui.o
 GENERATED += $(OBJDIR)/imgui_demo.o
 GENERATED += $(OBJDIR)/imgui_draw.o
@@ -97,14 +104,21 @@ GENERATED += $(OBJDIR)/imgui_tables.o
 GENERATED += $(OBJDIR)/imgui_widgets.o
 OBJECTS += $(OBJDIR)/Application.o
 OBJECTS += $(OBJDIR)/Camera.o
-OBJECTS += $(OBJDIR)/Event.o
+OBJECTS += $(OBJDIR)/Layer.o
+OBJECTS += $(OBJDIR)/Mesh.o
+OBJECTS += $(OBJDIR)/Model.o
 OBJECTS += $(OBJDIR)/Object.o
+OBJECTS += $(OBJDIR)/PointLight.o
+OBJECTS += $(OBJDIR)/Primitive.o
+OBJECTS += $(OBJDIR)/RadialCamera.o
 OBJECTS += $(OBJDIR)/Shader.o
+OBJECTS += $(OBJDIR)/ShaderContainer.o
 OBJECTS += $(OBJDIR)/Texture.o
 OBJECTS += $(OBJDIR)/Transform.o
 OBJECTS += $(OBJDIR)/Window.o
 OBJECTS += $(OBJDIR)/glad.o
 OBJECTS += $(OBJDIR)/glm.o
+OBJECTS += $(OBJDIR)/gui.o
 OBJECTS += $(OBJDIR)/imgui.o
 OBJECTS += $(OBJDIR)/imgui_demo.o
 OBJECTS += $(OBJDIR)/imgui_draw.o
@@ -202,28 +216,49 @@ $(OBJDIR)/imgui_tables.o: Libs/imgui/imgui_tables.cpp
 $(OBJDIR)/imgui_widgets.o: Libs/imgui/imgui_widgets.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Application.o: Source/Core/Application.cpp
+$(OBJDIR)/Camera.o: Source/Quack/Camera/Camera.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Camera.o: Source/Core/Camera.cpp
+$(OBJDIR)/RadialCamera.o: Source/Quack/Camera/RadialCamera.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Event.o: Source/Core/Event.cpp
+$(OBJDIR)/Application.o: Source/Quack/Core/Application.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Object.o: Source/Core/Object.cpp
+$(OBJDIR)/Layer.o: Source/Quack/Core/Layer.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Shader.o: Source/Core/Shader.cpp
+$(OBJDIR)/Window.o: Source/Quack/Core/Window.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Texture.o: Source/Core/Texture.cpp
+$(OBJDIR)/gui.o: Source/Quack/GUI/gui.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Transform.o: Source/Core/Transform.cpp
+$(OBJDIR)/Mesh.o: Source/Quack/Geometry/Mesh.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Window.o: Source/Core/Window.cpp
+$(OBJDIR)/Model.o: Source/Quack/Geometry/Model.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Object.o: Source/Quack/Geometry/Object.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Primitive.o: Source/Quack/Geometry/Primitive.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Transform.o: Source/Quack/Geometry/Transform.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/PointLight.o: Source/Quack/Lighting/PointLight.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Shader.o: Source/Quack/Rendering/Shader.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ShaderContainer.o: Source/Quack/Rendering/ShaderContainer.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Texture.o: Source/Quack/Rendering/Texture.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

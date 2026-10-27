@@ -27,11 +27,11 @@ endif
 ifeq ($(origin AR), default)
   AR = ar
 endif
-INCLUDES += -ISource -I../Core/Source -I../Core/Libs
+INCLUDES += -ISource -I../Core/Source -I../Core/Source/Quack -I../Core/Libs -I../Core/Libs/imgui
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-ALL_LDFLAGS += $(LDFLAGS) -L../Core/Libs/GLFW -L/usr/lib64 -m64
+ALL_LDFLAGS += $(LDFLAGS) -L../Core/Libs/GLFW -L../Core/Libs/assimp -L/usr/lib64 -m64
 LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
 endef
@@ -47,7 +47,7 @@ OBJDIR = ../Binaries/Intermediates/linux-x86_64/Debug/App
 DEFINES += -DDEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++20
-LIBS += ../Binaries/linux-x86_64/Debug/Core/libCore.a -lglfw3
+LIBS += ../Binaries/linux-x86_64/Debug/Core/libCore.a -lglfw3 -lz -lassimp
 LDDEPS += ../Binaries/linux-x86_64/Debug/Core/libCore.a
 
 else ifeq ($(config),release)
@@ -57,7 +57,7 @@ OBJDIR = ../Binaries/Intermediates/linux-x86_64/Release/App
 DEFINES += -DRELEASE
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -g
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -g -std=c++20
-LIBS += ../Binaries/linux-x86_64/Release/Core/libCore.a -lglfw3
+LIBS += ../Binaries/linux-x86_64/Release/Core/libCore.a -lglfw3 -lz -lassimp
 LDDEPS += ../Binaries/linux-x86_64/Release/Core/libCore.a
 
 else ifeq ($(config),dist)
@@ -67,7 +67,7 @@ OBJDIR = ../Binaries/Intermediates/linux-x86_64/Dist/App
 DEFINES += -DDIST
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++20
-LIBS += ../Binaries/linux-x86_64/Dist/Core/libCore.a -lglfw3
+LIBS += ../Binaries/linux-x86_64/Dist/Core/libCore.a -lglfw3 -lz -lassimp
 LDDEPS += ../Binaries/linux-x86_64/Dist/Core/libCore.a
 
 endif
@@ -84,8 +84,10 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/App.o
 GENERATED += $(OBJDIR)/AppLayer.o
+GENERATED += $(OBJDIR)/GuiLayer.o
 OBJECTS += $(OBJDIR)/App.o
 OBJECTS += $(OBJDIR)/AppLayer.o
+OBJECTS += $(OBJDIR)/GuiLayer.o
 
 # Rules
 # #############################################
@@ -153,6 +155,9 @@ $(OBJDIR)/App.o: Source/App.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/AppLayer.o: Source/AppLayer.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/GuiLayer.o: Source/GuiLayer.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

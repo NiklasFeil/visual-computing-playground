@@ -1,5 +1,6 @@
-#include "Core/Application.hpp"
+#include "Quack/Core/Application.hpp"
 #include "AppLayer.hpp"
+#include "GuiLayer.hpp"
 
 int main()
 {
@@ -10,7 +11,8 @@ int main()
 	app_config.window_config.title = "Visual Computing";
 
 	Core::Application application(app_config);
-	application.push_layer<AppLayer>();
+	application.pushLayer<AppLayer>();
+	application.pushLayer<GuiLayer>();
 	application.run();
 
 }

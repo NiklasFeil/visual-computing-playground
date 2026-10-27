@@ -1,17 +1,18 @@
 #pragma once
-#include "Core/Layer.hpp"
-#include "Core/Event.hpp"
-#include "Core/Shader.hpp"
-#include "Core/Object.hpp"
-#include "Core/Primitive.hpp"
-#include "Core/Model.hpp"
-#include "Core/RadialCamera.hpp"
-#include "Core/InputEvent.hpp"
-#include "Core/WindowEvent.hpp"
+#include "Quack/Core/Layer.hpp"
+#include "Quack/Events/Event.hpp"
+#include "Quack/Rendering/Shader.hpp"
+#include "Quack/Geometry/Object.hpp"
+#include "Quack/Geometry/Primitive.hpp"
+#include "Quack/Geometry/Model.hpp"
+#include "Quack/Camera/RadialCamera.hpp"
+#include "Quack/Events/InputEvent.hpp"
+#include "Quack/Events/WindowEvent.hpp"
+#include "Quack/Lighting/PointLight.hpp"
+#include "Quack/Rendering/ShaderContainer.hpp"
+
 #include <vector>
 #include <memory>
-#include "Core/PointLight.hpp"
-#include "Core/ShaderContainer.hpp"
 
 class AppLayer : public Core::Layer {
 

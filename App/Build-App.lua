@@ -13,7 +13,9 @@ project "App"
 
 	  -- Include Core
 	  "../Core/Source",
-      "../Core/Libs"
+	  "../Core/Source/Quack",
+      "../Core/Libs",
+      "../Core/Libs/imgui",
    }
 
    libdirs
