@@ -90,9 +90,10 @@ void AppLayer::onUpdate(float dt) {
 
 void AppLayer::onRender() {
 
-    glEnable(GL_DEPTH_TEST);    
+    glEnable(GL_DEPTH_TEST);
     Core::Renderer::ClearColorBuffer({0.2f, 0.3f, 0.6f});
     Core::Renderer::ClearDepthBuffer();
+    Core::Renderer::EnableBackFaceCulling();
 
     Core::Shader& model_shader = m_shader_container->get_shader("model phong shader");
     model_shader.use();
@@ -117,6 +118,7 @@ void AppLayer::onRender() {
     }
 
     primitive_shader.setUniform("uModel", m_primitive->get_transform().getModelMatrix());
+    Core::Renderer::EnableFrontFaceCulling();
     m_primitive->render(primitive_shader);
 
     glBindVertexArray(0);
@@ -176,7 +178,7 @@ bool AppLayer::onMouseMoved(Core::MouseMovedEvent& event) {
 
 bool AppLayer::onMouseScrolled(Core::MouseScrolledEvent& event) {
 
-    m_camera->addToRadius(event.getOffsetY());
+    m_camera->addToRadius(-event.getOffsetY());
     m_camera->updatePos();    
     m_camera->updateView();
         
