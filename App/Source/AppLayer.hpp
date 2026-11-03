@@ -37,6 +37,11 @@ class AppLayer : public Core::Layer {
         // They can be stored in the same vector by storing pointers to LightSource
         std::vector<Core::PointLight> m_point_lights;
 
+        // Stores their own GuiWindow.
+        // Every App-type Layer has a dedicated GuiWindow which they can use to edit parameters in the scene.
+        // Additionally, there is a seperate GuiWindow which enables very general settings like switching scenes and maybe some other data.
+        //std::shared_ptr<Core::GuiWindow> m_gui_window;
+
         bool onKeyPressed(Core::KeyPressedEvent& event);
         bool onKeyReleased(Core::KeyReleasedEvent& event);
         bool onWindowResize(Core::WindowResizeEvent& event);

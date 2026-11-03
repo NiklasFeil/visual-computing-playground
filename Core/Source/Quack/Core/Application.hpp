@@ -4,12 +4,14 @@
 #include <memory>
 #include "Core/Layer.hpp"
 #include "Core/Window.hpp"
+#include "Gui/Gui.hpp"
 #include "glm/vec2.hpp"
 
 namespace Core {
     struct ApplicationConfig {
         std::string name;
         WindowConfig window_config;
+        GuiConfig gui_config;
     };
     
     class Application {
@@ -41,6 +43,8 @@ namespace Core {
 
             glm::vec2 getFramebufferSize() const;
 
+            std::shared_ptr<Gui> getGui() const;
+
             std::shared_ptr<Window> getWindow() const;
             
             std::vector<std::unique_ptr<Layer>>& getLayerStack();
@@ -59,7 +63,10 @@ namespace Core {
 
             std::vector<std::unique_ptr<Layer>> m_layer_stack;
             ApplicationConfig m_app_config;
+
+            std::shared_ptr<Gui> m_gui;
             std::shared_ptr<Window> m_window;
+            
             bool m_is_running;
     };
 }

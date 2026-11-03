@@ -5,6 +5,9 @@
 namespace Core {
     class Layer {
         public:
+
+            virtual void onAttach() {} // Call when unsuspended or on creation
+            virtual void onDetach() {} // Call when suspended or on destruction
             virtual void onEvent(Event& event) {}
             virtual void onUpdate(float dt) {}
             virtual void onRender() {}

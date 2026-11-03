@@ -32,10 +32,15 @@ namespace Core {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         m_app_config.window_config.event_callback = [this](Event& event) { raiseEvent(event); };
+        m_app_config.gui_config.event_callback = [this](Event& event) { raiseEvent(event); };
 
         // Create Window
-        m_window = std::make_unique<Window>(m_app_config.window_config);
+        m_window = std::make_shared<Window>(m_app_config.window_config);
         m_window->create();
+
+        // Create Gui
+        m_gui = std::make_shared<Gui>(m_app_config.gui_config);
+        m_gui->create(*m_window.get());
 
         // Init GLAD
         if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -96,6 +101,11 @@ namespace Core {
         return m_window->getFramebufferSize();
     }
 
+    std::shared_ptr<Gui> Application::getGui() const {
+        assert(m_gui);
+        return m_gui;
+    }
+
     std::shared_ptr<Window> Application::getWindow() const {
         assert(m_window);
         return m_window;
@@ -117,7 +127,6 @@ namespace Core {
 
 
     void Application::raiseEvent(Event& event) {
-
         for (auto& layer : std::views::reverse(m_layer_stack)) {
             layer->onEvent(event);
             if (event.handled) break;
