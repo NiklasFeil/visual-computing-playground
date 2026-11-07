@@ -29,27 +29,11 @@ namespace Core {
 
             void render();
 
-            /*
-            // Done so in the future, the GuiWindow constructor may take more than its title and this stays flexible.
-            // Returns reference to the created GuiWindow. 
-            //! Error source: Reference might get invalidated when creating new window using this method.
-            template <typename ... Args>
-            GuiWindow& createGuiWindow(Args&& ... args) {
-                m_gui_windows.emplace_back(std::forward<Args>(args) ...); // Returns reference from C++17 onwards
-                return m_gui_windows.back();
-            }
-            */
+            GuiWindow& createGuiWindow(std::string title);
+            void destroyGuiWindow(const std::string& title);
 
-            GuiWindow& createGuiWindow(std::string title) {
-                GuiWindowSpecs specs;
-                specs.title = std::move(title);
-                specs.event_callback = [this](Event& event) { raiseEvent(event); };
-                auto pair = m_gui_windows.emplace(title, specs);
-                auto it = pair.first;
-                bool inserted = pair.second;
-                assert(inserted); // TODO: Throw proper exception
-                return (*it).second;
-            }
+            GuiWindow& getGuiWindow(const std::string& title);
+            
 
         private:
             GuiConfig m_gui_config;

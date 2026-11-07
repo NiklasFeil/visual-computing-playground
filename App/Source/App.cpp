@@ -1,6 +1,6 @@
 #include "Quack/Core/Application.hpp"
-#include "AppLayer.hpp"
-#include "GuiLayer.hpp"
+#include "AppLayer/AppLayer.hpp"
+#include "GuiLayer/GuiLayer.hpp"
 
 int main()
 {

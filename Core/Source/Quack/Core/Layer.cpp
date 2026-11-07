@@ -9,7 +9,9 @@ namespace Core {
 
         for (auto& layer : layer_stack) {
             if (layer.get() == this) {
+                layer->onDetach(); // Detach old layer
                 layer = std::move(new_layer);
+                layer->onAttach(); // Attach new layer
                 return;
             }
         }

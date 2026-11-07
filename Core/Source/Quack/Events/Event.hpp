@@ -7,10 +7,18 @@ namespace Core {
 
     enum class EventType {
         None = 0,
+
+        // Window
         WindowClose, WindowResize,
+        
+        // Keyboard
         KeyPressed, KeyReleased,
+        
+        // Mouse
         MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
-        GuiButtonPressed, GuiSliderShifted, GuiCheckboxChanged
+
+        // GUI
+        GuiInteraction, //GuiButtonPressed, GuiSliderShifted, GuiCheckboxChanged
     };
 
 #define EVENT_CLASS_TYPE(type) static EventType getStaticType() { return EventType::type; } \

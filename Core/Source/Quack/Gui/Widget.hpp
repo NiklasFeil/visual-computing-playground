@@ -14,38 +14,58 @@ namespace Core {
 
     using EventCallbackFn = std::function<void(Event&)>;
 
-    struct Text { std::string t; };
-    struct Button { std::string label; ImVec2 dim; EventCallbackFn event_callback; };
-    struct SliderFloat { std::string label; ImVec2 minmax; EventCallbackFn event_callback; float value; };
-    struct Checkbox { std::string label; EventCallbackFn event_callback; bool value; };
+    struct Text { std::string text; };
+    struct Button { std::string text; ImVec2 dim; EventCallbackFn event_callback; };
+    struct SliderFloat { std::string text; ImVec2 minmax; EventCallbackFn event_callback; float value; };
+    struct Checkbox { std::string text; EventCallbackFn event_callback; bool value; };
 
-    using Widget = std::variant<Text, Button, SliderFloat, Checkbox>;
+    using WidgetId = int;
+    using WidgetData = std::variant<Text, Button, SliderFloat, Checkbox>;
 
     struct VisitWidget {
-        void operator()(Text& text)     { ImGui::Text("%s", text.t.c_str()); }
-        void operator()(Button& button) { 
-            if (ImGui::Button(button.label.c_str(), button.dim)) { 
-                GuiButtonPressedEvent event(button.label);
+
+        void operator()(WidgetId id, std::string label, Text& text)     { ImGui::Text("%s", text.text.c_str()); }
+        void operator()(WidgetId id, std::string label, Button& button) { 
+            if (ImGui::Button(button.text.c_str(), button.dim)) { 
+                GuiInteractionEventTyped<Button, std::monostate> event(id, std::move(label));
                 if(button.event_callback) button.event_callback(event);
             }
         }
-        void operator()(SliderFloat& slider) {
+        void operator()(WidgetId id, std::string label, SliderFloat& slider) {
             float old = slider.value;
-            ImGui::SliderFloat(slider.label.c_str(), &slider.value, slider.minmax.x, slider.minmax.y);
+            ImGui::SliderFloat(slider.text.c_str(), &slider.value, slider.minmax.x, slider.minmax.y);
             if (old != slider.value) {
-                GuiSliderShiftedEvent event(slider.label, slider.value);
+                GuiInteractionEventTyped<SliderFloat, float> event(id, std::move(label), slider.value);
                 if(slider.event_callback) slider.event_callback(event);
             }
         }
-        void operator()(Checkbox& checkbox) {
+        void operator()(WidgetId id, std::string label, Checkbox& checkbox) {
             bool old = checkbox.value;
-            ImGui::Checkbox(checkbox.label.c_str(), &checkbox.value);
+            ImGui::Checkbox(checkbox.text.c_str(), &checkbox.value);
             if (old != checkbox.value) {
-                GuiCheckboxChangedEvent event(checkbox.label, checkbox.value);
+                GuiInteractionEventTyped<Checkbox, bool> event(id, std::move(label), checkbox.value);
                 if(checkbox.event_callback) checkbox.event_callback(event);
             }
         }
     };
 
-    void renderWidget(Widget& widget);
+    struct Widget {
+        WidgetId id;
+        std::string label;
+        WidgetData data;
+
+        Widget();
+        Widget(const Widget& other);
+        Widget& operator=(const Widget& other);
+
+        void render() {
+            ImGui::PushID(id);
+            //std::visit(VisitWidget(), data); -> Cannot be used like this because we also need to supply the id
+            std::visit([this](auto& w) { VisitWidget{}(id, label, w); }, data);
+            ImGui::PopID();
+        }
+
+        private:
+            static inline int id_counter = 0;
+    };
 }

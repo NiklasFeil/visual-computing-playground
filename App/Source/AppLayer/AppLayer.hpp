@@ -8,6 +8,7 @@
 #include "Quack/Camera/RadialCamera.hpp"
 #include "Quack/Events/InputEvent.hpp"
 #include "Quack/Events/WindowEvent.hpp"
+#include "Quack/Events/GuiEvent.hpp"
 #include "Quack/Lighting/PointLight.hpp"
 #include "Quack/Rendering/ShaderContainer.hpp"
 
@@ -20,6 +21,8 @@ class AppLayer : public Core::Layer {
         AppLayer();
         ~AppLayer();
 
+        void onAttach() override;
+        void onDetach() override;
         void onEvent(Core::Event& event) override;
         void onUpdate(float dt) override;
         void onRender() override;
@@ -37,11 +40,6 @@ class AppLayer : public Core::Layer {
         // They can be stored in the same vector by storing pointers to LightSource
         std::vector<Core::PointLight> m_point_lights;
 
-        // Stores their own GuiWindow.
-        // Every App-type Layer has a dedicated GuiWindow which they can use to edit parameters in the scene.
-        // Additionally, there is a seperate GuiWindow which enables very general settings like switching scenes and maybe some other data.
-        //std::shared_ptr<Core::GuiWindow> m_gui_window;
-
         bool onKeyPressed(Core::KeyPressedEvent& event);
         bool onKeyReleased(Core::KeyReleasedEvent& event);
         bool onWindowResize(Core::WindowResizeEvent& event);
@@ -49,4 +47,5 @@ class AppLayer : public Core::Layer {
         bool onMouseButtonReleased(Core::MouseButtonReleasedEvent& event);
         bool onMouseMoved(Core::MouseMovedEvent& event);
         bool onMouseScrolled(Core::MouseScrolledEvent& event);
+        bool onGuiInteraction(Core::GuiInteractionEvent& event);
 };

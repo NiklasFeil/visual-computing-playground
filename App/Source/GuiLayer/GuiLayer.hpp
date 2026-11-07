@@ -14,7 +14,5 @@ class GuiLayer : public Core::Layer {
         void onRender() override;
 
     private:
-        bool onGuiButtonPressed(Core::Event& event);
-        bool onGuiSliderShifted(Core::Event& event);
-        bool onGuiCheckboxChanged(Core::Event& event);
-};
+        bool onGuiInteraction(Core::GuiInteractionEvent& event);
+};  

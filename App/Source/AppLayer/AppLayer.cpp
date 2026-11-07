@@ -1,6 +1,10 @@
-#include "AppLayer.hpp"
 #include <iostream>
 #include <vector>
+#include <filesystem>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/quaternion.hpp"
+#include <glm/gtx/string_cast.hpp>
+
 #include "Quack/Core/Window.hpp"
 #include "Quack/Rendering/Shader.hpp"
 #include "Quack/Geometry/Transform.hpp"
@@ -8,19 +12,21 @@
 #include "Quack/Core/Application.hpp"
 #include "Quack/Events/InputEvent.hpp"
 #include "Quack/Events/WindowEvent.hpp"
-#include <filesystem>
-#include "glm/gtx/quaternion.hpp"
 #include "Quack/Camera/RadialCamera.hpp"
 #include "Quack/Utils/Utils.hpp"
 #include "Quack/Events/Input.hpp"
 #include "Quack/Mappings/ButtonMappings.hpp"
 #include "Quack/Mappings/KeyMappings.hpp"
 #include "Quack/Rendering/Renderer.hpp"
-#include "GuiLayer.hpp"
-#include <glm/gtx/string_cast.hpp>
+#include "GuiLayer/GuiLayer.hpp"
+#include "AppLayer/AppLayer.hpp"
 
-AppLayer::AppLayer() {
+AppLayer::AppLayer() {}
 
+AppLayer::~AppLayer() {}
+
+void AppLayer::onAttach() {
+    std::cout << "Attach AppLayer" << std::endl;
     m_shader_container = std::make_unique<Core::ShaderContainer>();
 
     Core::Shader primitive_phong_shader("App/Shaders/phong.vert", "App/Shaders/phong_primitive.frag");
@@ -44,14 +50,24 @@ AppLayer::AppLayer() {
     m_point_lights.emplace_back(glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0f, 10.0f);
 
     Core::Input::SetLastMousePos(Core::Input::GetMousePosX(), Core::Input::GetMousePosY());
+
+    // Create corresponding GuiWindow
+    std::shared_ptr<Core::Gui> gui = Core::Application::Get().getGui();
+    Core::GuiWindow& gui_window = gui->createGuiWindow("AppLayer");
+
+    gui_window.addWidget<Core::Text>("applayer_lighting_model_text", "Choose lighting model");
+    gui_window.addWidget<Core::Button>("applayer_phong_button", "Phong", {50, 50});
+    gui_window.addWidget<Core::Button>("applayer_gouraud_button", "Gouraud", {50, 50});
 }
 
-AppLayer::~AppLayer() {
+void AppLayer::onDetach() {
     std::cout << "Terminating AppLayer" << std::endl;
     m_object.reset();
     m_shader_container->clear();
     m_basic_shader.reset();
     m_point_lights.clear();
+    std::shared_ptr<Core::Gui> gui = Core::Application::Get().getGui();
+    gui->destroyGuiWindow("AppLayer");
 }
 
 void AppLayer::onEvent(Core::Event& event) {
@@ -67,6 +83,8 @@ void AppLayer::onEvent(Core::Event& event) {
     dispatcher.dispatch<Core::MouseButtonReleasedEvent>([this](Core::MouseButtonReleasedEvent& e) { return onMouseButtonReleased(e); });
 
     dispatcher.dispatch<Core::WindowResizeEvent>([this](Core::WindowResizeEvent& e) { return onWindowResize(e); });
+
+    dispatcher.dispatch<Core::GuiInteractionEvent>([this](Core::GuiInteractionEvent& e) { return onGuiInteraction(e); });
 }
 
 void AppLayer::onUpdate(float dt) {
@@ -183,4 +201,31 @@ bool AppLayer::onMouseScrolled(Core::MouseScrolledEvent& event) {
     m_camera->updateView();
         
     return false;
+}
+
+bool AppLayer::onGuiInteraction(Core::GuiInteractionEvent& event) {
+    //std::cout << event.toString() << std::endl;
+
+    if (event.getLabel().rfind("applayer_", 0) != 0 && event.getLabel().rfind("general_", 0) != 0) {
+        // Pass through if widget is not dedicated for applayer content
+        return false;
+    }
+
+    if (auto* e = event.as<Core::Button>()) {
+        const std::string& label = e->getLabel();
+        if (label == "general_button_showcase") {
+            TransitionTo<AppLayer>();
+        }
+        else if (label == "general_button_heightmap") {
+            TransitionTo<AppLayer>();
+        }
+    }
+    if (auto* e = event.as<Core::SliderFloat, float>()) {
+        std::cout << "Slider shifted" << std::endl;
+    }
+    if (auto* e = event.as<Core::Checkbox, bool>()) {
+        std::cout << "Checkbox changed" << std::endl;
+    }
+
+    return true;
 }

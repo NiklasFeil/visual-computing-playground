@@ -26,7 +26,9 @@ namespace Core {
             template <typename LT>
             requires(std::is_base_of_v<Layer, LT>)
             void pushLayer() {
-                m_layer_stack.push_back(std::make_unique<LT>());
+                std::unique_ptr<LT> layer = std::make_unique<LT>();
+                layer->onAttach();
+                m_layer_stack.push_back(std::move(layer));
             }
 
             template <typename LT>

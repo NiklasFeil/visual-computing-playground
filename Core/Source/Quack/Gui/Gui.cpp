@@ -66,4 +66,26 @@ namespace Core {
         if (m_gui_config.event_callback)
             m_gui_config.event_callback(event);
     }
+
+    GuiWindow& Gui::createGuiWindow(std::string title) {
+        GuiWindowSpecs specs;
+        specs.title = std::move(title);
+        specs.event_callback = [this](Event& event) { raiseEvent(event); };
+        auto pair = m_gui_windows.emplace(specs.title, specs);
+        auto it = pair.first;
+        bool inserted = pair.second;
+        std::cout << "Tried creating GuiWindow " << specs.title << std::endl;
+        assert(inserted); // TODO: Throw proper exception
+        return (*it).second;
+    }
+
+    void Gui::destroyGuiWindow(const std::string& title) {
+        unsigned int num_removed = m_gui_windows.erase(title);
+        assert(num_removed);
+        std::cout << "GuiWindow " << title << " destroyed!";
+    }
+
+    GuiWindow& Gui::getGuiWindow(const std::string& title) {
+        return m_gui_windows.at(title);
+    }
 }
