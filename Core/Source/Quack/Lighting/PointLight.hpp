@@ -13,6 +13,6 @@ namespace Core {
 
         private:
             float m_radius;
-            Cuboid m_mesh;
+            Sphere m_mesh;
     };
 }

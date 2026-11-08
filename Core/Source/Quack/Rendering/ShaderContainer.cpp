@@ -12,7 +12,6 @@ namespace Core {
             assert(false);
         }
     }
-
     
     void ShaderContainer::remove_shader(std::string name) {
         if (m_shader_mapping.contains(name)) {
@@ -36,5 +35,11 @@ namespace Core {
 
     void ShaderContainer::clear() {
         m_shader_mapping.clear();
+    }
+
+    void ShaderContainer::reloadShaders() {
+        for(auto it=m_shader_mapping.begin(); it!=m_shader_mapping.end(); it++) {
+            it->second.reload();
+        }
     }
 }

@@ -162,14 +162,12 @@ void AppLayer::onRender() {
 }
 
 bool AppLayer::onKeyPressed(Core::KeyPressedEvent& event) {
-
-    /*
-    if (event.get_key_code() == Core::Key::Space) {
-        std::cout << "Switch" << std::endl;
-        TransitionTo<GuiLayer>();
+    
+    if (event.getKeyCode() == Core::Key::R) {
+        std::cout << "Reload shaders" << std::endl;
+        m_shader_container->reloadShaders();
         return true;
     }
-    */
     
     return false;
 }

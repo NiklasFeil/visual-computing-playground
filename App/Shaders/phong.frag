@@ -36,7 +36,7 @@ void main()
     float specularStrength = 0.1f;
     vec3 viewDir = normalize(uViewPos - vFragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
-    int shininess = 4;
+    int shininess = 2;
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     vec3 specular = specularStrength * spec * uLight.color;
 

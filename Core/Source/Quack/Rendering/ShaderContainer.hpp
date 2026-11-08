@@ -17,7 +17,8 @@ namespace Core {
             Shader& get_shader(std::string name);
 
             void clear();
-            
+
+            void reloadShaders();
 
         private:
             std::unordered_map<std::string, Shader> m_shader_mapping{};

@@ -3,10 +3,10 @@
 
 namespace Core {
 
-    Cuboid construct_mesh(const glm::vec3& position, const glm::vec3& color) {        
+    Sphere construct_mesh(const glm::vec3& position, const glm::vec3& color) {        
         Transform transform(position);
         transform.setScale(0.2f);
-        Cuboid mesh(transform, color, true);
+        Sphere mesh(transform, color, false);
         return mesh;
     }
 
@@ -18,5 +18,4 @@ namespace Core {
         shader.setUniform("uModel", m_mesh.get_transform().getModelMatrix());
         m_mesh.render(shader);
     }
-
 }
