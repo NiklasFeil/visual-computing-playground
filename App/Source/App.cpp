@@ -5,10 +5,10 @@
 int main()
 {
 	Core::ApplicationConfig app_config;
-	app_config.name = "Visual Computing";
+	app_config.name = "Visual Computing Playground";
 	app_config.window_config.width = 1920;
 	app_config.window_config.height = 1080;
-	app_config.window_config.title = "Visual Computing";
+	app_config.window_config.title = "Visual Computing Playground";
 
 	Core::Application application(app_config);
 	application.pushLayer<AppLayer>();

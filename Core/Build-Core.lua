@@ -1,7 +1,7 @@
 project "Core"
    kind "StaticLib"
    language "C++"
-   cppdialect "C++20"
+   cppdialect "C++26"
    targetdir "Binaries/%{cfg.buildcfg}"
    staticruntime "off"
 

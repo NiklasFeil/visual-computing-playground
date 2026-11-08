@@ -22,6 +22,7 @@ namespace Core {
             void setPosition(const glm::vec3& new_pos);
             void setOrientation(const glm::quat& new_orientation);
             void setScale(const glm::vec3& new_scale);
+            void setScale(const float new_scale);
             
             void translate(const glm::vec3& trans);
             void rotate(const glm::quat& rotation);

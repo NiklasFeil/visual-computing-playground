@@ -1,4 +1,6 @@
 #include "Rendering/ShaderContainer.hpp"
+#include "Logger/Logger.hpp"
+#include <format>
 
 namespace Core {
 
@@ -27,7 +29,7 @@ namespace Core {
             return m_shader_mapping.at(name);
         }
         else {
-            std::cerr << "Requested shader does not exist: " << name << std::endl;
+            Logger::Log(std::format("Requested shader does not exist: {}", name), LogLevel::Error);
             assert(false);
         }
     }

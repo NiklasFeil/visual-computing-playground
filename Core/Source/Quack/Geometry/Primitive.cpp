@@ -2,6 +2,7 @@
 #include "Rendering/Shader.hpp"
 #include "Rendering/Renderer.hpp"
 #include "GLAD/glad.h"
+#include <print>
 
 namespace Core {
     
@@ -18,15 +19,28 @@ namespace Core {
         };
 
         const float h = 0.5f;
-
-        const Face faces[6] = {
-            {{ 1, 0, 0}, {{ h,-h, h}, { h,-h,-h}, { h, h,-h}, { h, h, h}}},  // +X
-            {{-1, 0, 0}, {{-h,-h,-h}, {-h,-h, h}, {-h, h, h}, {-h, h,-h}}},  // -X
-            {{ 0, 1, 0}, {{-h, h, h}, { h, h, h}, { h, h,-h}, {-h, h,-h}}},  // +Y
-            {{ 0,-1, 0}, {{-h,-h,-h}, { h,-h,-h}, { h,-h, h}, {-h,-h, h}}},  // -Y
-            {{ 0, 0, 1}, {{-h,-h, h}, { h,-h, h}, { h, h, h}, {-h, h, h}}},  // +Z
-            {{ 0, 0,-1}, {{ h,-h,-h}, {-h,-h,-h}, {-h, h,-h}, { h, h,-h}}},  // -Z
-        };
+        std::array<Face, 6> faces = [&]() -> std::array<Face, 6> {
+            if (m_inverted) {
+                return {{
+                    {{-1, 0, 0}, {{ h,-h, h}, { h,-h,-h}, { h, h,-h}, { h, h, h}}},  // +X
+                    {{ 1, 0, 0}, {{-h,-h,-h}, {-h,-h, h}, {-h, h, h}, {-h, h,-h}}},  // -X
+                    {{ 0,-1, 0}, {{-h, h, h}, { h, h, h}, { h, h,-h}, {-h, h,-h}}},  // +Y
+                    {{ 0, 1, 0}, {{-h,-h,-h}, { h,-h,-h}, { h,-h, h}, {-h,-h, h}}},  // -Y
+                    {{ 0, 0,-1}, {{-h,-h, h}, { h,-h, h}, { h, h, h}, {-h, h, h}}},  // +Z
+                    {{ 0, 0, 1}, {{ h,-h,-h}, {-h,-h,-h}, {-h, h,-h}, { h, h,-h}}},  // -Z
+                }};
+            }
+            else {
+                return {{
+                    {{ 1, 0, 0}, {{ h,-h, h}, { h,-h,-h}, { h, h,-h}, { h, h, h}}},  // +X
+                    {{-1, 0, 0}, {{-h,-h,-h}, {-h,-h, h}, {-h, h, h}, {-h, h,-h}}},  // -X
+                    {{ 0, 1, 0}, {{-h, h, h}, { h, h, h}, { h, h,-h}, {-h, h,-h}}},  // +Y
+                    {{ 0,-1, 0}, {{-h,-h,-h}, { h,-h,-h}, { h,-h, h}, {-h,-h, h}}},  // -Y
+                    {{ 0, 0, 1}, {{-h,-h, h}, { h,-h, h}, { h, h, h}, {-h, h, h}}},  // +Z
+                    {{ 0, 0,-1}, {{ h,-h,-h}, {-h,-h,-h}, {-h, h,-h}, { h, h,-h}}},  // -Z
+                }};
+            }
+        }();        
 
         for (const Face& face : faces) {
             const unsigned int base = static_cast<unsigned int>(m_vertices.size());
@@ -73,12 +87,13 @@ namespace Core {
     }
 
     void Primitive::render(Shader& shader) {
-
         shader.use();
 
         shader.setUniform("uObjectColor", m_color);
+        shader.setUniform("uModel", m_transform.getModelMatrix());
 
+        m_inverted? Renderer::EnableFrontFaceCulling() : Renderer::EnableBackFaceCulling();
         Renderer::Draw(m_vao, m_indices.size());
-        
+        Renderer::EnableBackFaceCulling();
     }
 }

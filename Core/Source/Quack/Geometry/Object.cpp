@@ -10,6 +10,9 @@ namespace Core {
 
     void Object::render(Shader& shader) {
         shader.use();
+
+        shader.setUniform("uModel", m_transform.getModelMatrix());
+    
         m_model.render(shader);
     }
 

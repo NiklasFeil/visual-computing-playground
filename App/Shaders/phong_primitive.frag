@@ -24,11 +24,11 @@ void main()
     // diffuse 
     vec3 norm = normalize(vNormal);
     vec3 lightDir = normalize(uLight.position - vFragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
+    float diff = max(dot(norm, lightDir), 0.0) * 3.0f;
     vec3 diffuse = diff * uLight.color;
     
     // specular
-    float specularStrength = 0.5;
+    float specularStrength = 0.3;
     vec3 viewDir = normalize(uViewPos - vFragPos);
     vec3 reflectDir = reflect(-lightDir, norm);  
     const float shininess = 32;

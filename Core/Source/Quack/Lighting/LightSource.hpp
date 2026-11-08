@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glm/vec3.hpp"
+#include "Geometry/Transform.hpp"
 
 namespace Core {
     class LightSource {
@@ -12,7 +13,7 @@ namespace Core {
             inline glm::vec3 get_color() { return m_color; }
             inline float get_lux() { return m_lux; }
 
-        private:
+        protected:
             glm::vec3 m_position;
             glm::vec3 m_color;
             float m_lux;

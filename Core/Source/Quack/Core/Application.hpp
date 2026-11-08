@@ -4,6 +4,7 @@
 #include <memory>
 #include "Core/Layer.hpp"
 #include "Core/Window.hpp"
+#include "Logger/Logger.hpp"
 #include "Gui/Gui.hpp"
 #include "glm/vec2.hpp"
 
@@ -68,6 +69,7 @@ namespace Core {
 
             std::shared_ptr<Gui> m_gui;
             std::shared_ptr<Window> m_window;
+            std::shared_ptr<Logger> m_logger;
             
             bool m_is_running;
     };

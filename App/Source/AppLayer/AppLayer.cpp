@@ -1,6 +1,6 @@
-#include <iostream>
 #include <vector>
 #include <filesystem>
+#include <print>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
 #include <glm/gtx/string_cast.hpp>
@@ -18,6 +18,8 @@
 #include "Quack/Mappings/ButtonMappings.hpp"
 #include "Quack/Mappings/KeyMappings.hpp"
 #include "Quack/Rendering/Renderer.hpp"
+#include "Quack/Logger/Logger.hpp"
+
 #include "GuiLayer/GuiLayer.hpp"
 #include "AppLayer/AppLayer.hpp"
 
@@ -26,7 +28,7 @@ AppLayer::AppLayer() {}
 AppLayer::~AppLayer() {}
 
 void AppLayer::onAttach() {
-    std::cout << "Attach AppLayer" << std::endl;
+    Core::Logger::Log("Attach AppLayer", Core::LogLevel::Info);
     m_shader_container = std::make_unique<Core::ShaderContainer>();
 
     Core::Shader primitive_phong_shader("App/Shaders/phong.vert", "App/Shaders/phong_primitive.frag");
@@ -37,21 +39,30 @@ void AppLayer::onAttach() {
     model_phong_shader.compile();
     m_shader_container->add_shader("model phong shader", std::move(model_phong_shader));
 
-    Core::Transform transform_obj(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-    Core::Transform transform_cube(glm::vec3(3.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+    Core::Shader light_shader("App/Shaders/light.vert", "App/Shaders/light.frag");
+    light_shader.compile();
+    m_shader_container->add_shader("light shader", std::move(light_shader));
 
+    Core::Logger::Log("Spawn cow", Core::LogLevel::Info);
     const Core::Model model("App/Models/cow/cow.obj", true);
+    Core::Transform transform_obj(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     m_object = std::make_unique<Core::Object>(model, transform_obj);
-    m_primitive = std::make_unique<Core::Cuboid>(transform_cube, glm::vec3(1.0f, 0.0f, 0.0f));
+
+    Core::Logger::Log("Spawn cube", Core::LogLevel::Info);
+    Core::Transform transform_cube(glm::vec3(0.0f, 0.0f, 0.0f));
+    transform_cube.setScale({10.0f, 10.0f, 10.0f});
+    m_primitive = std::make_unique<Core::Cuboid>(transform_cube, glm::vec3(118.0/255.0, 41.0/255.0, 23.0/255.0), true);
     
     m_camera = std::make_unique<Core::RadialCamera>(glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 45.0f);
 
+    // Lights
     m_point_lights = std::vector<Core::PointLight>();
     m_point_lights.emplace_back(glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0f, 10.0f);
 
     Core::Input::SetLastMousePos(Core::Input::GetMousePosX(), Core::Input::GetMousePosY());
 
     // Create corresponding GuiWindow
+    Core::Logger::Log("Create AppLayer GuiWindow", Core::LogLevel::Info);
     std::shared_ptr<Core::Gui> gui = Core::Application::Get().getGui();
     Core::GuiWindow& gui_window = gui->createGuiWindow("AppLayer");
 
@@ -61,7 +72,7 @@ void AppLayer::onAttach() {
 }
 
 void AppLayer::onDetach() {
-    std::cout << "Terminating AppLayer" << std::endl;
+    Core::Logger::Log("Detach AppLayer", Core::LogLevel::Info);
     m_object.reset();
     m_shader_container->clear();
     m_basic_shader.reset();
@@ -88,7 +99,7 @@ void AppLayer::onEvent(Core::Event& event) {
 }
 
 void AppLayer::onUpdate(float dt) {
-    m_object->getTransform().rotate(glm::angleAxis(0.01f, glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f))));
+    m_object->getTransform().rotate(glm::angleAxis(0.04f, glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f))));
 
     constexpr float multiplier = 0.1f;
 
@@ -113,6 +124,7 @@ void AppLayer::onRender() {
     Core::Renderer::ClearDepthBuffer();
     Core::Renderer::EnableBackFaceCulling();
 
+    // Render cow model
     Core::Shader& model_shader = m_shader_container->get_shader("model phong shader");
     model_shader.use();
     model_shader.setCameraUniforms(*m_camera.get());
@@ -122,10 +134,9 @@ void AppLayer::onRender() {
         model_shader.setUniform("uLight.position", m_point_lights[i].get_position());
     }
 
-    model_shader.setUniform("uModel", m_object->getTransform().getModelMatrix());
     m_object->render(model_shader);
 
-
+    // Render cube
     Core::Shader& primitive_shader = m_shader_container->get_shader("primitive phong shader");
     primitive_shader.use();
     primitive_shader.setCameraUniforms(*m_camera.get());
@@ -135,9 +146,16 @@ void AppLayer::onRender() {
         primitive_shader.setUniform("uLight.position", m_point_lights[i].get_position());
     }
 
-    primitive_shader.setUniform("uModel", m_primitive->get_transform().getModelMatrix());
-    Core::Renderer::EnableFrontFaceCulling();
     m_primitive->render(primitive_shader);
+
+    // Render lights
+    Core::Shader& light_shader = m_shader_container->get_shader("light shader");
+    light_shader.use();
+    light_shader.setCameraUniforms(*m_camera.get());
+    
+    for (uint16_t i = 0; i < m_point_lights.size(); i++) {
+        m_point_lights[i].render(light_shader);
+    }
 
     glBindVertexArray(0);
     glDisable(GL_DEPTH_TEST);

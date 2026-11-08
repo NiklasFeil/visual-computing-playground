@@ -54,6 +54,11 @@ namespace Core {
         m_model_up_to_date = false;
     }
 
+    void Transform::setScale(const float new_scale) {
+        m_scale = { new_scale, new_scale, new_scale };
+        m_model_up_to_date = false;
+    }
+
     void Transform::setScale(const glm::vec3& new_scale) {
         m_scale = new_scale;
         m_model_up_to_date = false;

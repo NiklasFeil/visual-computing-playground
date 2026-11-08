@@ -1,4 +1,8 @@
 #include "Gui.hpp"
+#include "Logger/Logger.hpp"
+#include "ExceptionHandler/ExceptionHandler.hpp"
+#include <print>
+#include <format>
 
 namespace Core {
 
@@ -74,15 +78,14 @@ namespace Core {
         auto pair = m_gui_windows.emplace(specs.title, specs);
         auto it = pair.first;
         bool inserted = pair.second;
-        std::cout << "Tried creating GuiWindow " << specs.title << std::endl;
-        assert(inserted); // TODO: Throw proper exception
+        ExceptionHandler::Assert(inserted, std::format("Creating GuiWindow {} failed!", title));
         return (*it).second;
     }
 
     void Gui::destroyGuiWindow(const std::string& title) {
         unsigned int num_removed = m_gui_windows.erase(title);
         assert(num_removed);
-        std::cout << "GuiWindow " << title << " destroyed!";
+        std::println("GuiWindow {} destroyed!", title);
     }
 
     GuiWindow& Gui::getGuiWindow(const std::string& title) {

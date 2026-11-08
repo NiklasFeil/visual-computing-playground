@@ -27,13 +27,13 @@ void main()
     vec3 lightDir = vec3(uLight.position - vFragPos);
     vec3 objectColor = texture2D(texture_diffuse1, vUV).xyz;
     
-    float ambientStrength = 0.4f;
+    float ambientStrength = 0.3f;
     vec3 ambient = ambientStrength * uLight.color;
 
     float diffuseStrength = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diffuseStrength * uLight.color;
 
-    float specularStrength = 0.0f;
+    float specularStrength = 0.1f;
     vec3 viewDir = normalize(uViewPos - vFragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     int shininess = 4;

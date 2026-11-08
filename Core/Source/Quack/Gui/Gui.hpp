@@ -36,6 +36,7 @@ namespace Core {
             
 
         private:
+ 
             GuiConfig m_gui_config;
 
             std::unordered_map<std::string, GuiWindow> m_gui_windows; // TODO: Exchange string for enum

@@ -13,8 +13,8 @@ namespace Core {
 
     class Primitive {
         public:
-            Primitive(const Transform& transform, const glm::vec3& color)
-                : m_transform(transform), m_color(color) {}
+            Primitive(const Transform& transform, const glm::vec3& color, const bool inverted = false)
+                : m_transform(transform), m_color(color), m_inverted(inverted) {}
 
             virtual ~Primitive() = default;
 
@@ -31,6 +31,10 @@ namespace Core {
 
             void render(Shader& shader);
 
+            std::vector<unsigned int> get_indices() {
+                return m_indices;
+            }
+
         protected:
             Transform m_transform;
             glm::vec3 m_color;
@@ -41,12 +45,14 @@ namespace Core {
             // render data
             unsigned int m_vao, m_vbo, m_ebo;
 
+            bool m_inverted;
+
     };
 
     class Cuboid : public Primitive {
         public:
-            Cuboid(const Transform& transform, const glm::vec3& color)
-                : Primitive(transform, color) {
+            Cuboid(const Transform& transform, const glm::vec3& color, const bool inverted = false)
+                : Primitive(transform, color, inverted) {
                     generate_vertices();
                     construct_model();
                 }
@@ -56,8 +62,8 @@ namespace Core {
 
     class Sphere : public Primitive {
         public:
-            Sphere(const Transform& transform, const glm::vec3& color)
-                : Primitive(transform, color) {
+            Sphere(const Transform& transform, const glm::vec3& color, const bool inverted = false)
+                : Primitive(transform, color, inverted) {
                     generate_vertices();
                     construct_model();
                 }
@@ -67,8 +73,8 @@ namespace Core {
 
     class Cylinder : public Primitive {
         public:
-            Cylinder(const Transform& transform, const glm::vec3& color)
-                : Primitive(transform, color) {
+            Cylinder(const Transform& transform, const glm::vec3& color, const bool inverted = false)
+                : Primitive(transform, color, inverted) {
                     generate_vertices();
                     construct_model();
                 }
@@ -78,8 +84,8 @@ namespace Core {
 
     class Cone : public Primitive {
         public:
-            Cone(const Transform& transform, const glm::vec3& color)
-                : Primitive(transform, color) {
+            Cone(const Transform& transform, const glm::vec3& color, const bool inverted = false)
+                : Primitive(transform, color, inverted) {
                     generate_vertices();
                     construct_model();
                 }

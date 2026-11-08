@@ -42,6 +42,10 @@ namespace Core {
         m_gui = std::make_shared<Gui>(m_app_config.gui_config);
         m_gui->create(*m_window.get());
 
+        // Create Logger
+        m_logger = std::make_shared<Logger>();
+        m_logger->create();
+
         // Init GLAD
         if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
             std::cout << "Failed to initialize GLAD" << std::endl;

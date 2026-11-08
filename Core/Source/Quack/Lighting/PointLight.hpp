@@ -1,5 +1,6 @@
 #pragma once
 #include "Lighting/LightSource.hpp"
+#include "Geometry/Primitive.hpp"
 
 namespace Core {
     class PointLight : public LightSource {
@@ -8,7 +9,10 @@ namespace Core {
 
             inline float get_radius() { return m_radius; }
 
+            void render(Shader& shader);
+
         private:
             float m_radius;
+            Cuboid m_mesh;
     };
 }
