@@ -7,7 +7,7 @@
 
 namespace Core {
     Shader::Shader(const std::filesystem::path vertex_shader_path, const std::filesystem::path fragment_shader_path)
-    : m_vertex_shader_path(vertex_shader_path), m_fragment_shader_path(fragment_shader_path) {
+    : m_vertex_shader_path(vertex_shader_path), m_fragment_shader_path(fragment_shader_path), m_use_fallback(false) {
         std::tie(m_vertex_shader_code, m_fragment_shader_code) = ShaderCodeFromFile(m_vertex_shader_path, m_fragment_shader_path);
     }
 
@@ -40,7 +40,8 @@ namespace Core {
         {
             // TODO: Throw proper error
             glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+            //std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+            ExceptionHandler::Throw(std::runtime_error("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"), "Failed compiling vertex shader");
         }
 
         unsigned int fragmentShader;
@@ -56,7 +57,8 @@ namespace Core {
         {
             // TODO: Throw proper error
             glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+            // std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+            ExceptionHandler::Throw(std::runtime_error("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"), "Failed compiling fragment shader");
         }
 
         GLuint id = glCreateProgram();
@@ -68,7 +70,8 @@ namespace Core {
         glGetProgramiv(id, GL_LINK_STATUS, &success);
         if(!success) {
             glGetProgramInfoLog(id, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+            //std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+            ExceptionHandler::Throw(std::runtime_error("ERROR::SHADER::PROGRAM::LINKING_FAILED\n"), "Failed linking shader program");
         }
 
         glDeleteShader(vertexShader);
@@ -84,9 +87,9 @@ namespace Core {
     }
 
     std::pair<std::string, std::string> Shader::ShaderCodeFromFile(const std::filesystem::path vertex_shader_path, const std::filesystem::path fragment_shader_path) {
-        //ExceptionHandler::Assert(std::filesystem::exists(vertex_shader_path), std::format("Given vertex shader path {} does not exist.", vertex_shader_path));
 
-        //ExceptionHandler::Assert(std::filesystem::exists(fragment_shader_path), std::format("Given fragment shader path {} does not exist.", fragment_shader_path));
+        ExceptionHandler::Assert(std::filesystem::exists(vertex_shader_path), "Path to vertex shader does not exist.");
+        ExceptionHandler::Assert(std::filesystem::exists(fragment_shader_path), "Path to fragment shader does not exist.");
 
         std::ifstream vshader_file;
         std::ifstream fshader_file;
@@ -108,7 +111,9 @@ namespace Core {
             vertex_shader_code = vshader_stream.str();
         }
         catch(std::ifstream::failure& e) {
-            std::cout << "ERROR::vertex_shader::FILE_NOT_SUCCESSFULLY_READ | Error code: " << e.code() << std::endl;
+            //std::cout << "ERROR::vertex_shader::FILE_NOT_SUCCESSFULLY_READ | Error code: " << e.code() << std::endl;
+            //ExceptionHandler::Throw(e, std::format("Could not read vertex shader file successfully | Error code: {}", e.code()));
+            ExceptionHandler::Throw(e, "Could not read vertex shader file successfully.");
         }
 
         try {
@@ -124,7 +129,9 @@ namespace Core {
             fragment_shader_code = fshader_stream.str();
         }
         catch(std::ifstream::failure& e) {
-            std::cout << "ERROR::fragment_shader::FILE_NOT_SUCCESSFULLY_READ | Error code: " << e.code() << std::endl;
+            //std::cout << "ERROR::fragment_shader::FILE_NOT_SUCCESSFULLY_READ | Error code: " << e.code() << std::endl;
+            //ExceptionHandler::Throw(e, std::format("Could not read fragment shader file successfully | Error code: {}", e.code()));
+            ExceptionHandler::Throw(e, "Could not read fragment shader file successfully.");
         }
 
         return std::make_pair(vertex_shader_code, fragment_shader_code);
@@ -132,9 +139,18 @@ namespace Core {
 
     void Shader::reload() {
         std::string vertex_shader_code, fragment_shader_code;
-        std::tie(vertex_shader_code, fragment_shader_code) = ShaderCodeFromFile(m_vertex_shader_path, m_fragment_shader_path);
+        GLuint new_program;
 
-        GLuint new_program = constructShaderProgram(vertex_shader_code, fragment_shader_code);
+        try {
+            std::tie(vertex_shader_code, fragment_shader_code) = ShaderCodeFromFile(m_vertex_shader_path, m_fragment_shader_path);
+            new_program = constructShaderProgram(vertex_shader_code, fragment_shader_code);
+        } catch(std::runtime_error e) {
+            Logger::Log("Reloading shader did not work. Using fallback...", LogLevel::Warning);
+            std::filesystem::path vertex_fallback_path = "Core/Shaders/fallback.vert";
+            std::filesystem::path fragment_fallback_path = "Core/Shaders/fallback.frag";
+            std::tie(vertex_shader_code, fragment_shader_code) = ShaderCodeFromFile(vertex_fallback_path, fragment_fallback_path);
+            new_program = constructShaderProgram(vertex_shader_code, fragment_shader_code);
+        }
 
         if (new_program) {
             glDeleteProgram(m_id);

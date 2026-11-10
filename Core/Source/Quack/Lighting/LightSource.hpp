@@ -6,16 +6,17 @@
 namespace Core {
     class LightSource {
         public:
-            LightSource(glm::vec3 position, glm::vec3 color, float lux)
-            : m_position(position), m_color(color), m_lux(lux) {}
+            LightSource(glm::vec3 position, glm::vec3 color, float intensity)
+            : m_position(position), m_color(color), m_intensity(intensity) {}
 
             inline glm::vec3 get_position() { return m_position; }
             inline glm::vec3 get_color() { return m_color; }
-            inline float get_lux() { return m_lux; }
+            inline float get_intensity() { return m_intensity; }
+            inline void set_intensity(float new_intensity) { m_intensity = new_intensity; }
 
         protected:
             glm::vec3 m_position;
             glm::vec3 m_color;
-            float m_lux;
+            float m_intensity;
     };
 }

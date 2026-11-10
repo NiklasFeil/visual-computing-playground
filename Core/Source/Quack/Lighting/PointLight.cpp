@@ -1,5 +1,4 @@
 #include "Lighting/PointLight.hpp"
-#include <print>
 
 namespace Core {
 
@@ -10,8 +9,8 @@ namespace Core {
         return mesh;
     }
 
-    PointLight::PointLight(glm::vec3 position, glm::vec3 color, float lux, float radius)
-        : LightSource(position, color, lux), m_radius(radius), m_mesh(construct_mesh(position, color)) {}
+    PointLight::PointLight(glm::vec3 position, glm::vec3 color, float intensity, float radius, float falloff)
+        : LightSource(position, color, intensity), m_radius(radius), m_falloff(falloff), m_mesh(construct_mesh(position, color)) {}
 
     void PointLight::render(Shader& shader) {
         shader.setUniform("uColor", m_color);

@@ -30,7 +30,7 @@ class AppLayer : public Core::Layer {
     private:
 
         std::unique_ptr<Core::Object> m_object;
-        std::unique_ptr<Core::Primitive> m_primitive;
+        std::unique_ptr<Core::Object> m_cube;
         
         std::unique_ptr<Core::Shader> m_basic_shader;
         std::unique_ptr<Core::ShaderContainer> m_shader_container;

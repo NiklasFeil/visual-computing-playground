@@ -51,6 +51,8 @@ namespace Core {
             std::filesystem::path m_vertex_shader_path;
             std::filesystem::path m_fragment_shader_path;
 
+            bool m_use_fallback;
+
             // uniforms per type
             #include "Rendering/setUniformImpl.inl"
     };

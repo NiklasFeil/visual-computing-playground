@@ -26,11 +26,11 @@ void addWidget(std::string label, std::string text, ImVec2 dim) {
 
 // SliderFloat
 template<std::same_as<SliderFloat> W>
-void addWidget(std::string label, std::string text, ImVec2 minmax) {
+void addWidget(std::string label, std::string text, ImVec2 minmax, float initial_value) {
     W s;
     s.text = text;
     s.minmax = minmax;
-    s.value = minmax.x;
+    s.value = initial_value;
     s.event_callback = [this](Event& e) { raiseEvent(e); };
 
     Widget w;

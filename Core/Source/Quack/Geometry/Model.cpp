@@ -4,6 +4,21 @@
 
 namespace Core {
 
+    Model::Model(PrimitiveType p, std::variant<Texture, Color> tex_or_color, bool inverted) {
+        switch (p) {
+            case PrimitiveType::Cuboid:
+                m_meshes.push_back(Mesh::Cuboid(tex_or_color, inverted));
+                break;
+            /*
+                case PrimitiveType::Sphere:
+                m_meshes.push_back(Mesh::Sphere());
+                break;
+            */
+            default:
+                Logger::Log("Primitive not yet implemented in Model class.", LogLevel::Warning);
+        }
+    }
+
     Model::Model(std::string path, bool flip_uvs) {
         loadModel(path, flip_uvs);
     }

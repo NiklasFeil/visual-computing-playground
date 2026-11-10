@@ -133,6 +133,7 @@ namespace Core {
         shader.use();
 
         shader.setUniform("uObjectColor", m_color);
+        shader.setUniform("uUseColor", true);
         shader.setUniform("uModel", m_transform.getModelMatrix());
 
         Renderer::Draw(m_vao, m_indices.size());

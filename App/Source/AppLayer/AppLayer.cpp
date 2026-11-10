@@ -31,33 +31,31 @@ void AppLayer::onAttach() {
     Core::Logger::Log("Attach AppLayer", Core::LogLevel::Info);
     m_shader_container = std::make_unique<Core::ShaderContainer>();
 
-    Core::Shader primitive_phong_shader("App/Shaders/phong.vert", "App/Shaders/phong_primitive.frag");
-    primitive_phong_shader.compile();
-    m_shader_container->add_shader("primitive phong shader", std::move(primitive_phong_shader));
-
-    Core::Shader model_phong_shader("App/Shaders/phong.vert", "App/Shaders/phong.frag");
-    model_phong_shader.compile();
-    m_shader_container->add_shader("model phong shader", std::move(model_phong_shader));
+    Core::Shader phong_shader("App/Shaders/phong.vert", "App/Shaders/phong.frag");
+    phong_shader.compile();
+    m_shader_container->add_shader("phong", std::move(phong_shader));
 
     Core::Shader light_shader("App/Shaders/light.vert", "App/Shaders/light.frag");
     light_shader.compile();
-    m_shader_container->add_shader("light shader", std::move(light_shader));
+    m_shader_container->add_shader("light", std::move(light_shader));
 
     Core::Logger::Log("Spawn cow", Core::LogLevel::Info);
-    const Core::Model model("App/Models/cow/cow.obj", true);
+    const Core::Model cow("App/Models/cow/cow.obj", true);
     Core::Transform transform_obj(glm::vec3(0.0f, 0.0f, 0.0f), glm::angleAxis(glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-    m_object = std::make_unique<Core::Object>(model, transform_obj);
+    m_object = std::make_unique<Core::Object>(cow, transform_obj);
 
     Core::Logger::Log("Spawn cube", Core::LogLevel::Info);
+    const Core::Model cube(Core::PrimitiveType::Cuboid, glm::vec3{1.0f, 1.0f, 1.0f}, true);
     Core::Transform transform_cube(glm::vec3(0.0f, 0.0f, 0.0f));
     transform_cube.setScale({10.0f, 10.0f, 10.0f});
-    m_primitive = std::make_unique<Core::Cuboid>(transform_cube, glm::vec3(118.0/255.0, 41.0/255.0, 23.0/255.0), true);
+    m_cube = std::make_unique<Core::Object>(cube, transform_cube);
     
     m_camera = std::make_unique<Core::RadialCamera>(glm::vec3(-10.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 45.0f);
 
     // Lights
+    float initial_intensity = 1.0f, initial_radius = 4.0f, initial_falloff = 5.0f;
     m_point_lights = std::vector<Core::PointLight>();
-    m_point_lights.emplace_back(glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0f, 10.0f);
+    m_point_lights.emplace_back(glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 4.0f, 5.0f);
 
     Core::Input::SetLastMousePos(Core::Input::GetMousePosX(), Core::Input::GetMousePosY());
 
@@ -65,6 +63,10 @@ void AppLayer::onAttach() {
     Core::Logger::Log("Create AppLayer GuiWindow", Core::LogLevel::Info);
     std::shared_ptr<Core::Gui> gui = Core::Application::Get().getGui();
     Core::GuiWindow& gui_window = gui->createGuiWindow("AppLayer");
+
+    gui_window.addWidget<Core::SliderFloat>("applayer_pointlight_intensity", "Pointlight Intensity", {0.1f, 3.0f}, initial_intensity);
+    gui_window.addWidget<Core::SliderFloat>("applayer_pointlight_radius", "Pointlight Radius", {0.1f, 20.0f}, initial_radius);
+    gui_window.addWidget<Core::SliderFloat>("applayer_pointlight_falloff", "Pointlight Falloff", {0.0f, 15.0f}, initial_falloff);
 
     gui_window.addWidget<Core::Text>("applayer_lighting_model_text", "Choose lighting model");
     gui_window.addWidget<Core::Button>("applayer_phong_button", "Phong", {50, 50});
@@ -125,31 +127,36 @@ void AppLayer::onRender() {
     Core::Renderer::EnableBackFaceCulling();
 
     // Render cow model
-    Core::Shader& model_shader = m_shader_container->get_shader("model phong shader");
-    model_shader.use();
-    model_shader.setCameraUniforms(*m_camera.get());
+    Core::Shader& phong_shader = m_shader_container->get_shader("phong");
+    phong_shader.use();
+    phong_shader.setCameraUniforms(*m_camera.get());
 
     for (uint16_t i = 0; i < m_point_lights.size(); ++i) {
-        model_shader.setUniform("uLight.color", m_point_lights[i].get_color());
-        model_shader.setUniform("uLight.position", m_point_lights[i].get_position());
+        phong_shader.setUniform("uPointLight.color", m_point_lights[i].get_color());
+        phong_shader.setUniform("uPointLight.position", m_point_lights[i].get_position());
+        phong_shader.setUniform("uPointLight.intensity", m_point_lights[i].get_intensity());
+        phong_shader.setUniform("uPointLight.radius", m_point_lights[i].get_radius());
+        phong_shader.setUniform("uPointLight.falloff", m_point_lights[i].get_falloff());
     }
 
-    m_object->render(model_shader);
+    m_object->render(phong_shader);
 
     // Render cube
-    Core::Shader& primitive_shader = m_shader_container->get_shader("primitive phong shader");
-    primitive_shader.use();
-    primitive_shader.setCameraUniforms(*m_camera.get());
+    phong_shader.use();
+    phong_shader.setCameraUniforms(*m_camera.get());
 
     for (uint16_t i = 0; i < m_point_lights.size(); ++i) {
-        primitive_shader.setUniform("uLight.color", m_point_lights[i].get_color());
-        primitive_shader.setUniform("uLight.position", m_point_lights[i].get_position());
+        phong_shader.setUniform("uPointLight.color", m_point_lights[i].get_color());
+        phong_shader.setUniform("uPointLight.position", m_point_lights[i].get_position());
+        phong_shader.setUniform("uPointLight.intensity", m_point_lights[i].get_intensity());
+        phong_shader.setUniform("uPointLight.radius", m_point_lights[i].get_radius());
+        phong_shader.setUniform("uPointLight.falloff", m_point_lights[i].get_falloff());
     }
 
-    m_primitive->render(primitive_shader);
+    m_cube->render(phong_shader);
 
     // Render lights
-    Core::Shader& light_shader = m_shader_container->get_shader("light shader");
+    Core::Shader& light_shader = m_shader_container->get_shader("light");
     light_shader.use();
     light_shader.setCameraUniforms(*m_camera.get());
     
@@ -237,7 +244,24 @@ bool AppLayer::onGuiInteraction(Core::GuiInteractionEvent& event) {
         }
     }
     if (auto* e = event.as<Core::SliderFloat, float>()) {
-        std::cout << "Slider shifted" << std::endl;
+        const std::string& label = e->getLabel();
+        const float value = e->getValue();
+        if (label == "applayer_pointlight_intensity") {
+            for (auto& pl : m_point_lights) {
+                pl.set_intensity(value);
+            }
+        }
+        else if (label == "applayer_pointlight_radius") {
+            for (auto& pl : m_point_lights) {
+                pl.set_radius(value);
+            }
+        }
+        else if (label == "applayer_pointlight_falloff") {
+            for (auto& pl : m_point_lights) {
+                pl.set_falloff(value);
+            }
+        }
+
     }
     if (auto* e = event.as<Core::Checkbox, bool>()) {
         std::cout << "Checkbox changed" << std::endl;

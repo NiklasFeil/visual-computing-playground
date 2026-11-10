@@ -7,9 +7,16 @@
 #include "assimp/postprocess.h"
 
 namespace Core {
+
+    enum class PrimitiveType {
+        Cuboid,
+        Sphere
+    };
+
     class Model {
         public:
-            Model(std::string path, bool flip_uvs);
+            Model(std::string path, bool flip_uvs); // Load from file
+            Model(PrimitiveType p, std::variant<Texture, Color> tex_or_color, bool inverted = false); // Basic primitive
 
             void render(Shader& shader);
 
