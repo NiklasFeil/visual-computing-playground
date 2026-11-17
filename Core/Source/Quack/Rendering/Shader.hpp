@@ -26,11 +26,25 @@ namespace Core {
             void use();
             void compile();
 
-            void setCameraUniforms(Camera& camera);
-
             template <typename T>
             void setUniform(std::string_view name, T value) {
-                const int location = glGetUniformLocation(m_id, name.data());
+                const GLint location = [&]() {
+                    if(m_locations.contains(name.data()))
+                        return m_locations.at(name.data());
+                    
+                    GLint location = glGetUniformLocation(m_id, name.data());
+                    if (location != -1) {
+                        m_locations.emplace(name.data(), location);
+                    }
+                    return location;
+                }();
+                
+                if (location == -1) {
+                    //Logger::Log(std::format("Uniform \"{}\" was not found", name), LogLevel::Warning);
+                    return;
+                }
+
+                use();
                 setUniformImpl(location, value);
             }
 
@@ -50,6 +64,8 @@ namespace Core {
             std::string m_fragment_shader_code;
             std::filesystem::path m_vertex_shader_path;
             std::filesystem::path m_fragment_shader_path;
+
+            std::unordered_map<std::string, GLint> m_locations;
 
             bool m_use_fallback;
 

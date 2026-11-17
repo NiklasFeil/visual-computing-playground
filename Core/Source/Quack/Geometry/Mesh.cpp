@@ -5,12 +5,17 @@ namespace Core {
 
     // Loaded from file using code in Model
     Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
-    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_textures(std::move(textures)), m_use_color(false) {
+    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_textures(std::move(textures)), m_use_textures(true) {
         setup_mesh();
     }
 
-        Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Color color)
-    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_color(color), m_use_color(true) {
+    Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Color color, float shininess)
+    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_material{color, color, color, shininess}, m_use_textures(false) {
+        setup_mesh();
+    }
+
+    Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialSimple material)
+    : m_vertices(std::move(vertices)), m_indices(std::move(indices)), m_material(material), m_use_textures(false) {
         setup_mesh();
     }
 
@@ -58,14 +63,14 @@ namespace Core {
         glBindVertexArray(0);
     }
 
-    void Mesh::render(Shader& shader) {
+    void Mesh::render(const Camera& camera, Shader& shader) {
         
-        unsigned int diffuseNr = 1;
-        unsigned int specularNr = 1;
-        unsigned int normalNr = 1;
-        unsigned int heightNr = 1;
-
-        if (!m_use_color) {
+        if (m_use_textures) {
+            unsigned int diffuseNr = 1;
+            unsigned int specularNr = 1;
+            unsigned int normalNr = 1;
+            unsigned int heightNr = 1;
+            
             for(unsigned int i = 0; i < m_textures.size(); i++)
             {
                 glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
@@ -87,12 +92,19 @@ namespace Core {
             }
         }
         else {
-            shader.setUniform("uObjectColor", m_color);
+            shader.setUniform("uMaterialSimple.ambient", m_material.ambient);
+            shader.setUniform("uMaterialSimple.diffuse", m_material.diffuse);
+            shader.setUniform("uMaterialSimple.specular", m_material.specular);
+            shader.setUniform("uMaterialSimple.shininess", m_material.shininess);
         }
 
-        shader.setUniform("uUseColor", m_use_color);
+        shader.setUniform("uUseTextures", m_use_textures);
+        shader.setUniform("uView", camera.getViewMatrix());
+        shader.setUniform("uProjection", camera.getProjectionMatrix());
+        shader.setUniform("uViewPos", camera.getPosition());
 
         // draw mesh
+        shader.use();
         glBindVertexArray(m_vao);
         glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -100,7 +112,7 @@ namespace Core {
         glActiveTexture(GL_TEXTURE0);
     }   
 
-    Mesh Mesh::Cuboid(std::variant<Texture, Color> tex_or_color, bool inverted = false) {
+    std::pair<std::vector<Vertex>, std::vector<unsigned int>> Mesh::Cuboid(bool inverted = false) {
 
         std::vector<Vertex> vertices;
         vertices.reserve(24);
@@ -159,6 +171,9 @@ namespace Core {
             else           indices.insert(indices.end(), {base, base + 2, base + 1, base, base + 3, base + 2});
         }
 
+        return std::make_pair(vertices, indices);
+
+        /*
         // Define mesh with either a color or a texture, depending on what is given.
         if (std::holds_alternative<Texture>(tex_or_color)) {
             Texture tex = std::get<Texture>(tex_or_color);
@@ -170,7 +185,7 @@ namespace Core {
             Color color = std::get<Color>(tex_or_color);
             Mesh cuboid(vertices, indices, color);
             return cuboid;
-        }
+        }*/
         
     }
 }

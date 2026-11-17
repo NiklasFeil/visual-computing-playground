@@ -31,6 +31,7 @@ namespace Core {
             void scale(const float& scale);
 
             static Transform FromModelMatrix(const glm::mat4& model);
+            static Transform FromPosition(const glm::vec3 position);
 
         private:
 

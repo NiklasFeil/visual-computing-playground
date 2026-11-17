@@ -4,6 +4,7 @@
 #include "GLAD/glad.h"
 #include <print>
 
+/*
 namespace Core {
     
     void Cuboid::generate_vertices() {
@@ -132,6 +133,8 @@ namespace Core {
     void Primitive::render(Shader& shader) {
         shader.use();
 
+        std::println("PRIMITIVE RENDERED. WHERE IS THIS CODE???");
+
         shader.setUniform("uObjectColor", m_color);
         shader.setUniform("uUseColor", true);
         shader.setUniform("uModel", m_transform.getModelMatrix());
@@ -139,3 +142,5 @@ namespace Core {
         Renderer::Draw(m_vao, m_indices.size());
     }
 }
+
+*/

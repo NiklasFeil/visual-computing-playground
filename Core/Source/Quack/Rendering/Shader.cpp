@@ -80,12 +80,6 @@ namespace Core {
         return id;
     }
 
-    void Shader::setCameraUniforms(Camera& camera) {
-        setUniform("uView", camera.getViewMatrix());
-        setUniform("uProjection", camera.getProjectionMatrix());
-        setUniform("uViewPos", camera.getPosition());
-    }
-
     std::pair<std::string, std::string> Shader::ShaderCodeFromFile(const std::filesystem::path vertex_shader_path, const std::filesystem::path fragment_shader_path) {
 
         ExceptionHandler::Assert(std::filesystem::exists(vertex_shader_path), "Path to vertex shader does not exist.");

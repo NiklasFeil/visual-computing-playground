@@ -4,10 +4,14 @@
 
 namespace Core {
 
-    Model::Model(PrimitiveType p, std::variant<Texture, Color> tex_or_color, bool inverted) {
+    Model::Model(PrimitiveType p, std::variant<Material, MaterialSimple> material, bool inverted) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        // Can be exchanged for inspect (pattern matching C++26), which is on gcc experimental branch
         switch (p) {
             case PrimitiveType::Cuboid:
-                m_meshes.push_back(Mesh::Cuboid(tex_or_color, inverted));
+                std::tie(vertices, indices) = Mesh::Cuboid(inverted);
                 break;
             /*
                 case PrimitiveType::Sphere:
@@ -17,10 +21,17 @@ namespace Core {
             default:
                 Logger::Log("Primitive not yet implemented in Model class.", LogLevel::Warning);
         }
+
+        Mesh primitive = std::visit([&](const auto& m) { return Mesh {vertices, indices, m}; }, material);
+        m_meshes.push_back(std::move(primitive));
     }
 
     Model::Model(std::string path, bool flip_uvs) {
         loadModel(path, flip_uvs);
+    }
+
+    Model::Model(Mesh mesh) {
+        m_meshes.push_back(std::move(mesh));
     }
 
     void Model::loadModel(std::string path, bool flip_uvs) {
@@ -145,8 +156,8 @@ namespace Core {
         return textures; // Copy Elision constructs vector directly in caller's memory. No need to std::move.
     }       
 
-    void Model::render(Shader& shader) {
+    void Model::render(const Camera& camera, Shader& shader) {
         for(Mesh& mesh: m_meshes)
-            mesh.render(shader);
+            mesh.render(camera, shader);
     }
 }

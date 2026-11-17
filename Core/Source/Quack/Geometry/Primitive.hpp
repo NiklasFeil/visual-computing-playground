@@ -4,6 +4,7 @@
 #include "Rendering/Shader.hpp"
 #include "glm/vec3.hpp"
 
+/*
 namespace Core {
 
     struct PrimitiveVertex {
@@ -93,3 +94,4 @@ namespace Core {
             void generate_vertices() override;
     };
 }
+*/

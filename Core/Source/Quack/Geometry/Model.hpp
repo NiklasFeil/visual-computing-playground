@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <variant>
 #include "Rendering/Shader.hpp"
 #include "Geometry/Mesh.hpp"
 #include "assimp/Importer.hpp"
@@ -7,6 +8,8 @@
 #include "assimp/postprocess.h"
 
 namespace Core {
+
+    using Material = std::vector<Texture>;
 
     enum class PrimitiveType {
         Cuboid,
@@ -16,9 +19,10 @@ namespace Core {
     class Model {
         public:
             Model(std::string path, bool flip_uvs); // Load from file
-            Model(PrimitiveType p, std::variant<Texture, Color> tex_or_color, bool inverted = false); // Basic primitive
+            Model(PrimitiveType p, std::variant<Material, MaterialSimple> material, bool inverted = false); // Basic primitive
+            Model(Mesh mesh);
 
-            void render(Shader& shader);
+            void render(const Camera& camera, Shader& shader);
 
             std::vector<Texture> textures_loaded;
             

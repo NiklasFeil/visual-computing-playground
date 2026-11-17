@@ -1,5 +1,4 @@
 #pragma once
-#include <variant>
 #include "Rendering/Shader.hpp"
 #include "Rendering/Texture.hpp"
 
@@ -12,16 +11,24 @@ namespace Core {
         glm::vec3 bitangent;
     };
 
+    struct MaterialSimple {
+        glm::vec3 ambient;
+        glm::vec3 diffuse;
+        glm::vec3 specular;
+        float shininess;
+    };
+
     using Color = glm::vec3;
 
     class Mesh {
         public:
             Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-            Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Color color);
+            Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Color color, float shininess);
+            Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialSimple material);
 
-            void render(Shader& shader);
+            void render(const Camera& camera, Shader& shader);
 
-            static Mesh Cuboid(std::variant<Texture, Color> tex, bool inverted);
+            static std::pair<std::vector<Vertex>, std::vector<unsigned int>> Cuboid(bool inverted);
             //static Mesh Sphere();
 
         private:
@@ -29,9 +36,10 @@ namespace Core {
             std::vector<Vertex> m_vertices;
             std::vector<unsigned int> m_indices;
             std::vector<Texture> m_textures;
-            glm::vec3 m_color; // color as alternative to textures
+            
+            MaterialSimple m_material; // Simple material that can be handcrafted without textures
 
-            bool m_use_color;
+            bool m_use_textures; 
 
             // render data
             unsigned int m_vao, m_vbo, m_ebo;

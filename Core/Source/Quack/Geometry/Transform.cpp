@@ -106,4 +106,10 @@ namespace Core {
 
         return Transform(pos, orientation, scale);
     }
+
+    Transform Transform::FromPosition(const glm::vec3 position) {
+        Transform t;
+        t.translate(position);
+        return t;
+    }
 }

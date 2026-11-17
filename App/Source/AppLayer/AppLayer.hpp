@@ -2,7 +2,8 @@
 #include "Quack/Core/Layer.hpp"
 #include "Quack/Events/Event.hpp"
 #include "Quack/Rendering/Shader.hpp"
-#include "Quack/Geometry/Object.hpp"
+#include "Quack/Scene/Entity.hpp"
+#include "Quack/Scene/SceneGraph.hpp"
 #include "Quack/Geometry/Primitive.hpp"
 #include "Quack/Geometry/Model.hpp"
 #include "Quack/Camera/RadialCamera.hpp"
@@ -10,6 +11,8 @@
 #include "Quack/Events/WindowEvent.hpp"
 #include "Quack/Events/GuiEvent.hpp"
 #include "Quack/Lighting/PointLight.hpp"
+#include "Quack/Lighting/DirectionalLight.hpp"
+#include "Quack/Lighting/Spotlight.hpp"
 #include "Quack/Rendering/ShaderContainer.hpp"
 
 #include <vector>
@@ -29,16 +32,15 @@ class AppLayer : public Core::Layer {
 
     private:
 
-        std::unique_ptr<Core::Object> m_object;
-        std::unique_ptr<Core::Object> m_cube;
-        
-        std::unique_ptr<Core::Shader> m_basic_shader;
-        std::unique_ptr<Core::ShaderContainer> m_shader_container;
+        Core::SceneGraph m_scene_graph;
+        Core::ShaderContainer m_shader_container;
         std::unique_ptr<Core::RadialCamera> m_camera;
 
         // Store different types of light sources in different vectors.
         // They can be stored in the same vector by storing pointers to LightSource
         std::vector<Core::PointLight> m_point_lights;
+        std::vector<Core::Spotlight> m_spotlights;
+        std::unique_ptr<Core::DirectionalLight> m_directional_light;
 
         bool onKeyPressed(Core::KeyPressedEvent& event);
         bool onKeyReleased(Core::KeyReleasedEvent& event);
